@@ -3,3 +3,4 @@
 .idea
 .bundle
 spec/fixtures/modules/*
+spec/fixtures/manifests/site.pp
