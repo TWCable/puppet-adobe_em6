@@ -1,0 +1,14 @@
+fixtures:
+  repositories:
+    # put any forge module dependencies here
+    java:
+      repo: https://github.com/puppetlabs/puppetlabs-java.git
+      ref: '1.2.0'
+    stdlib:
+      repo: https://github.com/puppetlabs/puppetlabs-stdlib.git
+      ref: '4.2.0'
+    wget:
+      repo: https://github.com/maestrodev/puppet-wget.git
+      ref: 'v1.5.6'
+  symlinks:
+    adobe_em6: "#{source_dir}"

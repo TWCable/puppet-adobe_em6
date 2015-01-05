@@ -1,0 +1,5 @@
+.pe_build
+.vagrant
+.idea
+.bundle
+spec/fixtures/modules/*
