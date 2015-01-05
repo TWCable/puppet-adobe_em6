@@ -3,4 +3,5 @@
 .idea
 .bundle
 spec/fixtures/modules/*
-spec/fixtures/manifests/site.pp
+spec/fixtures/manifests/*
+spec/fixtures/hiera.yaml
