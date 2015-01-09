@@ -7,6 +7,6 @@ require 'spec_helper'
 describe 'adobe_em6' do
 
   it { should contain_class('adobe_em6') }
-  it { should contain_class('adobe_em6::pre_install') }
+  it { should contain_class('adobe_em6::pre_install_directory') }
 
 end

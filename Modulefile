@@ -6,3 +6,5 @@ author       ''
 project_page 'https://github.com/jscelza/puppet-adobe_em6'
 
 dependency 'puppetlabs/stdlib', '>=4.2.0'
+dependency 'puppetlabs/java', '>=1.2.0'
+

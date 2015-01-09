@@ -1,11 +1,13 @@
-# == Class: mesos
+# == Class: adobe_em6
 #
 # This module manages setup and installs of
-#     adobe_em6 and related packages
+#     Adobe Enterprise Manager 6.X and related packages
 #
 # == Parameters:
 #
-# [*PARAMS*] - What is it?
+# [*aem_group*] - Group used by application (default: aem)
+# [*aem_user*] - User used by application (default: aem)
+
 #
 # === Examples
 #
@@ -18,15 +20,20 @@
 #
 #
 class adobe_em6 (
-  $cms_group              = 'aem',
-  $cms_user               = 'aem',
-  $dir_cms_install_base   = '/data/apps/aem',
-  $dir_cms_log_base       = '/data/logs/aem',
-  $dir_tools_base         = '/data/tools/aem',
-  $dir_tools_log          = '/data/logs/tools/aem',
-  $java_version           = 'present',
-) {
+  $aem_group          = 'aem',
+  $aem_user           = 'aem',
+) inherits adobe_em6::params {
 
-  include adobe_em6::pre_install
+  ## Validation of variables
+  validate_re($aem_user, '^\w\w+$')
+  validate_re($aem_group, '^\w\w+$')
+  validate_absolute_path($adobe_em6::params::dir_aem_install)
+  validate_absolute_path($adobe_em6::params::dir_aem_log)
+  validate_absolute_path($adobe_em6::params::dir_tools)
+  validate_absolute_path($adobe_em6::params::dir_tools_log)
+
+  #Need a check for User/Group exists
+
+  include adobe_em6::pre_install_directory
 
 }
