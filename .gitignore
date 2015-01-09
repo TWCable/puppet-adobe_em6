@@ -2,6 +2,9 @@
 .vagrant
 .idea
 .bundle
-spec/fixtures/modules/*
-spec/fixtures/manifests/*
-spec/fixtures/hiera.yaml
+pkg/
+.DS_Store
+spec/fixtures
+*.idea
+*.swp
+*.tmp
