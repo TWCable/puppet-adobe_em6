@@ -17,21 +17,13 @@
 #
 class adobe_em6::pre_install_directory {
 
-  # Need to Add ability to test if version is newer
-  # if !defined( "java") {
-  #   notify {'Java not setup.  Installing it now.':}
-  #   class { 'java':
-  #     version       => $adobe_em6::java_version,
-  #   }
-  # }
-
   File {
-    owner   => $adobe_em6::aem_user,
-    group   => $adobe_em6::aem_group,
+    owner   => $adobe_em6::params::aem_user,
+    group   => $adobe_em6::params::aem_group,
     mode    => '0755',
   }
 
-######  Base File creation.  Will need to add checks
+######  Base File creation.  May need to add checks if already declared
   file { $adobe_em6::params::dir_base:
     ensure  => 'directory',
     owner   => 'root',
@@ -58,7 +50,8 @@ class adobe_em6::pre_install_directory {
     group   => 'root',
     require => File[ $adobe_em6::params::dir_base ],
   }
-######
+
+######  AEM specific base directories
 
   file { $adobe_em6::params::dir_aem_certs:
     ensure  => 'directory',

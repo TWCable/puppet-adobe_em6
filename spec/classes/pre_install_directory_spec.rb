@@ -1,15 +1,7 @@
 require 'spec_helper'
 
-# The following class are tested in this spec file
-#     adobe_em6
-#
 
 shared_examples_for "adobe_em6::pre_install_directory generic tests" do
-
-  # it { should contain_class('java').with(
-  #    'version' => "#{java_version}"
-  #   )
-  # }
 
   it {
     should contain_file("#{dir_base}").with(
@@ -130,16 +122,11 @@ describe 'adobe_em6::pre_install_directory' do
   let(:dir_aem_log)           { '/data/logs/aem' }
   let(:dir_tools)             { '/data/tools/aem' }
   let(:dir_tools_log)         { '/data/logs/tools' }
-  let(:java_version)          { 'present' }
 
   #
   # Setting Global params defaults
-  # let(:params) {{
-  #   :java_version           => java_version,
-  #   :dir_aem_install_base   => dir_aem_install_base,
-  #   :dir_aem_log            => dir_aem_log_base,
-  #   :dir_tools              => dir_tools_base,
-  #   :dir_tools_log          => dir_tools_log,
+  # let(:params) {
+  #   :dir_aem_install_base   => '/data/apps/aem',
   # }}
 
   it { should contain_class('adobe_em6') }
