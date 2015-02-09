@@ -19,10 +19,7 @@
 # === Copyright
 #
 #
-class adobe_em6 (
-  $aem_group          = 'aem',
-  $aem_user           = 'aem',
-) inherits adobe_em6::params {
+class adobe_em6 inherits adobe_em6::params {
 
   ## Validation of variables
   validate_re($aem_user, '^\w\w+$')
@@ -35,5 +32,14 @@ class adobe_em6 (
   #Need a check for User/Group exists
 
   include adobe_em6::pre_install_directory
+
+  # May want to add a log message to client to show that it downloading as long as it
+  # doesn't cause the report to look like an resource has changed
+  wget::fetch { 'download_aem_jar':
+    destination => "${adobe_em6::params::dir_aem_install}/${adobe_em6::params::pkg_aem_jar_name}",
+    source      => "${adobe_em6::params::remote_url_for_files}/${adobe_em6::params::pkg_aem_jar_name}",
+    timeout     => 0,
+    verbose     => true,
+  }
 
 }
