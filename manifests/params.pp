@@ -38,10 +38,21 @@ class adobe_em6::params (
   $dir_tools_log     = "${dir_base_logs}/tools"
   $dir_aem_certs     = "${dir_aem_install}/certs"
 
-  #Checking to ensure values are set
+  ## Validation of variables
+  validate_re($adobe_em6::params::aem_user, '^\w\w+$')
+  validate_re($adobe_em6::params::aem_group, '^\w\w+$')
+  validate_absolute_path($adobe_em6::params::dir_aem_install)
+  validate_absolute_path($adobe_em6::params::dir_aem_log)
+  validate_absolute_path($adobe_em6::params::dir_tools)
+  validate_absolute_path($adobe_em6::params::dir_tools_log)
+
+  ## Checking to ensure remote url is set
+  # Need to check for format (i.e. http://blah/blah)
   if ($remote_url_for_files == 'UNSET') {
     fail('You have not set "remote_url_for_files" which should be set to the HTTP location and path of the AEM jar')
   }
+
+  $aem_absolute_jar = "${adobe_em6::params::dir_aem_install}/${adobe_em6::params::pkg_aem_jar_name}"
 
   ## Checking Variables for license file.
   if ($license_customer_name == 'UNSET' or $license_product_version == 'UNSET' or $license_downloadid == 'UNSET') {
