@@ -5,10 +5,6 @@
 #
 # == Parameters:
 #
-# [*aem_group*] - Group used by application (default: aem)
-# [*aem_user*] - User used by application (default: aem)
-
-#
 # === Examples
 #
 #
@@ -21,25 +17,25 @@
 #
 class adobe_em6 inherits adobe_em6::params {
 
-  ## Validation of variables
-  validate_re($aem_user, '^\w\w+$')
-  validate_re($aem_group, '^\w\w+$')
-  validate_absolute_path($adobe_em6::params::dir_aem_install)
-  validate_absolute_path($adobe_em6::params::dir_aem_log)
-  validate_absolute_path($adobe_em6::params::dir_tools)
-  validate_absolute_path($adobe_em6::params::dir_tools_log)
-
   #Need a check for User/Group exists
+  Group <| title == $adobe_em6::params::aem_goup |> -> Pe_accounts::User <| title == $adobe_em6::params::aem_user |>
 
-  include adobe_em6::pre_install_directory
+  require adobe_em6::pre_install_directory
+  require java
+  require wget
 
   # May want to add a log message to client to show that it downloading as long as it
   # doesn't cause the report to look like an resource has changed
-  wget::fetch { 'download_aem_jar':
-    destination => "${adobe_em6::params::dir_aem_install}/${adobe_em6::params::pkg_aem_jar_name}",
-    source      => "${adobe_em6::params::remote_url_for_files}/${adobe_em6::params::pkg_aem_jar_name}",
-    timeout     => 0,
-    verbose     => true,
+  # Using exec rather then wget::Fetch do to the fact that wget:fetch/staging::file checks don't really work correctly.
+  # wget::fetch using a uless which seems to run the download every time.
+  # staging::file for some reason never uses the wget cache
+  exec { "download_aem_jar":
+    command => "wget --no-verbose -N -P '/var/cache/wget' ${adobe_em6::params::remote_url_for_files}/${adobe_em6::params::pkg_aem_jar_name}",
+    cwd     => $adobe_em6::params::dir_aem_install,
+    user    => $adobe_em6::params::aem_user,
+    creates => $adobe_em6::params::aem_absolute_jar,
+    path    => ['/bin', '/usr/bin'],
+    require => package[ 'wget' ],
   }
 
 }
