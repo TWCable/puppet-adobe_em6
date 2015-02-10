@@ -4,10 +4,17 @@
 #
 # === Parameters:
 #
-# [*name*]
-#   Description
+# [*instance_name*]
+#   Name of the instance (i.e. directory) that is being set up
 #
 # === External Parameters
+#
+# [*adobe_em6::params::dir_aem_install*]
+#   Base AEM install directory
+# [*adobe_em6::params::aem_user*]
+#   User that will own AEM related files
+# [*adobe_em6::params::aem_group*]
+#   Group that will own AEM related files
 #
 # === Examples:
 #
@@ -18,7 +25,7 @@ class adobe_em6::instance::post_install_config (
 ) {
 
   if $instance_name == 'UNSET' {
-    fail("'${instance_name}' is not a valid package name for 'instance_name'.")
+    fail("'instance_name' is not set.")
   }
 
   File {

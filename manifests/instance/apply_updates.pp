@@ -48,18 +48,4 @@ define adobe_em6::instance::apply_updates (
     require => package[ 'wget' ],
   }
 
-  # wget::fetch { "download_${title}_package":
-  #   destination => "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${filename}",
-  #   source      => "${adobe_em6::params::remote_url_for_files}/${filename}",
-  #   timeout     => 0,
-  #   cache_dir   => '/var/cache/wget',
-  # }
-
-  # staging::file { "download_${title}_package":
-  #   source      => "${adobe_em6::params::remote_url_for_files}/${filename}",
-  #   target      => "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${filename}",
-  #   timeout     => 900,
-  #   wget_option => '-N --directory-prefix=/var/cache/wget --cache=on'
-  # }
-
 }

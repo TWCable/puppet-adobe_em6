@@ -4,9 +4,9 @@
 #
 # === Parameters:
 #
-# [*aem_type*]
+# [*instance_type*]
 #   Either 'author' or 'publish'
-# [*aem_port*]
+# [*instance_port*]
 #   The port to run this instance on.
 # [*aem_update_list*]
 #   An array of AEM update, service packs, and hotfixes filenames
@@ -16,48 +16,59 @@
 #
 # [*adobe_em6::params::dir_aem_install*]
 #   Base AEM install directory
+# [*adobe_em6::params::aem_user*]
+#   User that will own AEM related files
+# [*adobe_em6::params::aem_group*]
+#   Group that will own AEM related files
+# [*adobe_em6::params::dir_aem_log*]
+#   Base AEM log directory
+# [*adobe_em6::params::aem_absolute_jar*]
+#   Full path include filename that aem jar will go
+# [*adobe_em6::params::aem_absolute_jar*]
+#   Full path include filename that aem jar will go
 #
 # === Examples:
 #
-  # $aem_instances  = hiera_hash('myname::adobe_em6::aem_instances')
-  # create_resources('adobe_em6::instance', $aem_instances)
+# $aem_instances  = hiera_hash('myname::adobe_em6::aem_instances')
+# create_resources('adobe_em6::instance', $aem_instances)
 
-  # adobe_em6::instance { 'author':
-  #   # aem_type extracts 'author' from name
-  #   # aem_port defaults to '4502'
-  # }
+# adobe_em6::instance { 'author':
+#   # instance_type extracts 'author' from name
+#   # instance_port defaults to '4502'
+# }
 
-  # adobe_em6::instance { 'publish':
-  #   # aem_type extracts 'publish' from name
-  #   # aem_port defaults to '4503'
-  # }
+# adobe_em6::instance { 'publish':
+#   # instance_type extracts 'publish' from name
+#   # instance_port defaults to '4503'
+# }
 
-  # adobe_em6::instance { 'author01':
-  #   aem_type => 'author',
-  #   aem_port => '4504',
-  # }
+# adobe_em6::instance { 'author01':
+#   instance_type => 'author',
+#   instance_port => '4504',
+# }
 
-  # adobe_em6::instance { 'publish01':
-  #   aem_type => 'publish',
-  #   aem_port => '4505',
-  # }
+# adobe_em6::instance { 'publish01':
+#   instance_type          => 'publish',
+#   instance_port          => '4505',
+#   aem_update_list
+# }
 
 
 define adobe_em6::instance (
-  $aem_type           = 'UNSET',
-  $aem_port           = 'UNSET',
+  $instance_type           = 'UNSET',
+  $instance_port           = 'UNSET',
   $aem_update_list    = [ 'AEM_6.0_Service_Pack_2-1.0.zip' ],
 ) {
 
   require ::adobe_em6
 
-  # if !defined( "adobe_em6") {
-  #   notify {'Class Adobe_em6 not explicitly defined.  Please add" \"include adobe_em6\" to your respected configurations':}
-  # }
+  if !defined( "adobe_em6") {
+    notify {'Class Adobe_em6 not explicitly defined.  Please add" \"include adobe_em6\" to your respected configurations':}
+  }
 
   ##################################
   ###  Instance's type and port check and other verifications
-  if ($aem_type == 'UNSET' or $aem_port == 'UNSET') {
+  if ($instance_type == 'UNSET' or $instance_port == 'UNSET') {
     if ($name == 'author') {
       $my_type      = 'author'
       $my_port      = '4502'
@@ -67,20 +78,20 @@ define adobe_em6::instance (
       $my_port = '4503'
     }
     else {
-      fail('Not using default titles of publish or author, so need to set the aem_type and aem_port')
+      fail('Not using default titles of publish or author, so need to set the instance_type and instance_port')
     }
   }
   else { # both parameters were passes in
-    if !($aem_type in ['author', 'publish']) {
-      fail("'${aem_type}' is not a valid 'aem_type' property. Should be 'author' or 'publish'.")
+    if !($instance_type in ['author', 'publish']) {
+      fail("'${instance_type}' is not a valid 'instance_type' property. Should be 'author' or 'publish'.")
     }
 
-    if $aem_port !~ /^\d{3,5}$/ {
-      fail("'${aem_port}' is not a valid 'aem_port' property. Should be a number.")
+    if $instance_port !~ /^\d{3,5}$/ {
+      fail("'${instance_port}' is not a valid 'instance_port' property. Should be a number.")
     }
 
-    $my_type  = $aem_type
-    $my_port  = $aem_port
+    $my_type  = $instance_type
+    $my_port  = $instance_port
   }
 
   validate_array($aem_update_list)
@@ -95,13 +106,11 @@ define adobe_em6::instance (
 
   file { "${adobe_em6::params::dir_aem_install}/${title}":
     ensure  => 'directory',
-    #path    => "${adobe_em6::params::dir_aem_install}/${title}",
     require => File[ $adobe_em6::params::dir_aem_install ],
   }
 
   file { "${adobe_em6::params::dir_aem_log}/${title}":
     ensure  => 'directory',
-    #path    => "${adobe_em6::params::dir_aem_log}/${title}",
     require => File[ $adobe_em6::params::dir_aem_log ],
   }
 
@@ -114,7 +123,6 @@ define adobe_em6::instance (
     creates => "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart",
     path    => ['/bin', '/usr/java/latest/bin/', '/usr/bin'],
     require => [ exec[ 'download_aem_jar' ], package[ 'java' ] ]
-    #require => staging::file[ 'download_aem_jar' ],
   }
 
   ##################################
@@ -127,7 +135,6 @@ define adobe_em6::instance (
 
   file { "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install":
     ensure  => 'directory',
-    #path    => "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install",
     require => Exec[ "unpack_crx_jar_for_${title}" ],
   }
 
