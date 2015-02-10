@@ -12,6 +12,11 @@
 #   An array of AEM update, service packs, and hotfixes filenames
 #   [ 'AEM_6.0_Service_Pack_2-1.0.zip', 'cq-6.0-featurepack-4137-1.0.zip', 'cq-6.0.0-hotfix-4135-1.0.2.zip' ]
 #
+# === External Parameters
+#
+# [*adobe_em6::params::dir_aem_install*]
+#   Base AEM install directory
+#
 # === Examples:
 #
   # $aem_instances  = hiera_hash('myname::adobe_em6::aem_instances')
@@ -44,12 +49,14 @@ define adobe_em6::instance (
   $aem_update_list    = [ 'AEM_6.0_Service_Pack_2-1.0.zip' ],
 ) {
 
-  if !defined( "adobe_em6") {
-    notify {'Class Adobe_em6 not explicitly defined.  Please add" \"include adobe_em6\" to your respected configurations':}
-  }
+  require ::adobe_em6
 
-  include adobe_em6::params
+  # if !defined( "adobe_em6") {
+  #   notify {'Class Adobe_em6 not explicitly defined.  Please add" \"include adobe_em6\" to your respected configurations':}
+  # }
 
+  ##################################
+  ###  Instance's type and port check and other verifications
   if ($aem_type == 'UNSET' or $aem_port == 'UNSET') {
     if ($name == 'author') {
       $my_type      = 'author'
@@ -88,42 +95,26 @@ define adobe_em6::instance (
 
   file { "${adobe_em6::params::dir_aem_install}/${title}":
     ensure  => 'directory',
-    path    => "${adobe_em6::params::dir_aem_install}/${title}",
+    #path    => "${adobe_em6::params::dir_aem_install}/${title}",
     require => File[ $adobe_em6::params::dir_aem_install ],
   }
 
-  # file { "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart":
-  #   ensure  => 'directory',
-  #   path    => "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart",
-  #   require => File[ "${adobe_em6::params::dir_aem_install}/${title}" ],
-  # }
-
   file { "${adobe_em6::params::dir_aem_log}/${title}":
     ensure  => 'directory',
-    path    => "${adobe_em6::params::dir_aem_log}/${title}",
+    #path    => "${adobe_em6::params::dir_aem_log}/${title}",
     require => File[ $adobe_em6::params::dir_aem_log ],
   }
 
   ##################################
-  ### Jar Set up
-  ### These steps should really be its own resource/function
-  $aem_jar = "${adobe_em6::params::dir_aem_install}/${title}/cq5-${my_type}-p${my_port}.jar"
-
-  file { "create_crx_jar_link_for_${title}":
-    ensure  => 'link',
-    target  => "${adobe_em6::params::dir_aem_install}/${adobe_em6::params::pkg_aem_jar_name}",
-    path    => $aem_jar,
-    replace => true,
-    force   => true,
-  }
-
+  ### Jar Unpacking
   exec { "unpack_crx_jar_for_${title}":
-    command => "/bin/bash -c \"source ~/.bash_profile && java -jar ${aem_jar} -unpack\"",
+    command => "/usr/bin/java -jar ${adobe_em6::params::aem_absolute_jar} -unpack",
     cwd     => "${adobe_em6::params::dir_aem_install}/${title}",
     user    => $adobe_em6::params::aem_user,
     creates => "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart",
-    path    => ['/bin', '/usr/java/latest/bin/'],
-    require => File[ "create_crx_jar_link_for_${title}" ],
+    path    => ['/bin', '/usr/java/latest/bin/', '/usr/bin'],
+    require => [ exec[ 'download_aem_jar' ], package[ 'java' ] ]
+    #require => staging::file[ 'download_aem_jar' ],
   }
 
   ##################################
@@ -134,15 +125,15 @@ define adobe_em6::instance (
   ## for now making the array a hash and using a create_resource to call the define type apply_updates
   $aem_update_hash = generate_resource_hash($aem_update_list, 'filename', "${title}_update")
 
-  file { "${adobe_em6::params::dir_aem_install}/${title}/crx_quickstart/install":
+  file { "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install":
     ensure  => 'directory',
-    path    => "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install",
+    #path    => "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install",
     require => Exec[ "unpack_crx_jar_for_${title}" ],
   }
 
   adobe_em6::instance::apply_updates_wrapper { "${title}_update_wrapper":
     update_hash => $aem_update_hash,
-    require     => File[ "${adobe_em6::params::dir_aem_install}/${title}/crx_quickstart/install" ],
+    require     => File[ "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install" ],
   }
 
   ##################################

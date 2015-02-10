@@ -18,7 +18,6 @@ define adobe_em6::instance::apply_updates_wrapper (
   $update_hash     = UNSET,
 ) {
 
-  #notify{"in wrapper with hash value of ${update_hash} in ${title}": }
   create_resources('adobe_em6::instance::apply_updates', $update_hash)
 
 }
