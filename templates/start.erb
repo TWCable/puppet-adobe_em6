@@ -2,51 +2,33 @@
 #
 # This script configures the start information for this server.
 #
-# The following variables may be used to override the defaults.
-# For one-time overrides the variable can be set as part of the command-line; e.g.,
+#  This file is managed by Puppet.  DON"T EDIT FILE
 #
-#     % CQ_PORT=1234 ./start
-#
-
-# TCP port used for stop and status scripts
-if [ -z "$CQ_PORT" ]; then
-	CQ_PORT=4502
+if [[ "${USER}" -ne "<%= scope['::adobe_em6::params::aem_user'] %>" ]]; then
+  echo "This script must be run as <%= scope['::adobe_em6::params::aem_user'] %>" 1>&2
+  exit 1
 fi
 
-# hostname of the interface that this server should listen to
-#if [ -z "$CQ_HOST" ]; then
-#	CQ_HOST=
-#fi
+## AEM Specific settings
+CQ_FILE_SIZE_LIMIT="<%= @start_file_size_limit %>"
+CQ_PORT="<%= @my_port %>"
+CQ_RUNMODE="<%= @my_type %>"
+CQ_HOST="<%= @start_host %>"
+CQ_USE_JAAS="<%= @start_use_jaas %>"
+CQ_JAAS_CONFIG="<%= @start_jaas_config %>"
 
-# runmode(s)
-if [ -z "$CQ_RUNMODE" ]; then
-	CQ_RUNMODE='author'
-fi
+AEM_ENV=<%= @start_aem_env %>
+CLASSPATH=${CLASSPATH}:<%= @start_classpath  %>
 
-# name of the jarfile
-#if [ -z "$CQ_JARFILE" ]; then
-#	CQ_JARFILE=''
-#fi
+## Parameters for JVM
+JVM_AEM_ARGS="<%= @start_jvm_aem_args %>"
+JVM_KEYSTORE_ARGS="<%= @start_jvm_keystore %>"
+JVM_MEMORY_ARGS="<%= @start_jvm_memory_args %>"
+JVM_MONITOR_ARGS="<%= @start_jvm_monitor_args %>"
+JVM_PROPERTY_ARGS="<%= @start_jvm_property_args %>"
 
-# use jaas.config
-#if [ -z "$CQ_USE_JAAS" ]; then
-#	CQ_USE_JAAS='true'
-#fi
-
-# config for jaas
-if [ -z "$CQ_JAAS_CONFIG" ]; then
-	CQ_JAAS_CONFIG='etc/jaas.config'
-fi
-
-# default JVM options
-if [ -z "$CQ_JVM_OPTS" ]; then
-	CQ_JVM_OPTS='-server -Xmx1024m -XX:MaxPermSize=256M -Djava.awt.headless=true'
-fi
-
-# file size limit (ulimit)
-if [ -z "$CQ_FILE_SIZE_LIMIT" ]; then
-	CQ_FILE_SIZE_LIMIT=8192
-fi
+CQ_JVM_OPTS="-server ${JVM_MEMORY_ARGS} ${JVM_PROPERTY_ARGS} -Djava.awt.headless=true ${JVM_AEM_ARGS} ${JVM_MONITOR_ARGS} ${JVM_KEYSTORE_ARGS}"
+CQ_RUNMODE="${CQ_RUNMODE},nosamplecontent,${AEM_ENV}"
 
 # ------------------------------------------------------------------------------
 # do not configure below this point
@@ -85,9 +67,16 @@ if [ $CQ_USE_JAAS ]; then
 fi
 START_OPTS="${START_OPTS} -Dsling.properties=conf/sling.properties"
 
+STDOUTLOG="${CURR_DIR}/logs/stdout.log"
+if [ -e ${STDOUTLOG} ]
+then
+        TIMESTAMP=`date +"%Y-%m-%d_%H-%M-%S"`
+        mv ${STDOUTLOG} ${STDOUTLOG}.${TIMESTAMP}
+fi
+
 (
   (
     java $CQ_JVM_OPTS -jar $CURR_DIR/$CQ_JARFILE $START_OPTS &
     echo $! > $CURR_DIR/conf/cq.pid
-  ) >> $CURR_DIR/logs/stdout.log 2>&1
+  ) >> ${STDOUTLOG} 2>&1
 ) &

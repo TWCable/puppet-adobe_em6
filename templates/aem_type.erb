@@ -1,0 +1,54 @@
+#!/bin/bash
+#
+# chkconfig: 345 95 20
+# description: Starts and stops aem  services.
+#
+#  This file is managed by Puppet.  DON"T EDIT FILE
+#
+
+# Source function library.
+. /etc/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ ${NETWORKING} = "no" ] && exit 0
+
+SCRIPTNAME=$0
+INSTANCENAME="<%= @title %>"
+PROG=$"CQ5 ${INSTANCENAME} instance."
+STARTUPDIR="<%= scope['::adobe_em6::params::dir_aem_install'] %>/${INSTANCENAME}/crx-quickstart"
+
+[ -f /etc/sysconfig/${INSTANCENAME} ] && . /etc/sysconfig/${INSTANCENAME}
+
+start() {
+        echo -e $"Starting:\n ${PROG} "
+        su - <%= scope['::adobe_em6::params::aem_user'] %> -c "${STARTUPDIR}/bin/start"
+}
+
+stop() {
+        echo -e $"Shutting down:\n ${PROG} "
+        su - <%= scope['::adobe_em6::params::aem_user'] %> -c "${STARTUPDIR}/bin/stop"
+}
+
+# See how we were called.
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|reload)
+        stop
+        sleep 30
+        start
+        ;;
+  status)
+        su - <%= scope['::adobe_em6::params::aem_user'] %> -c "${STARTUPDIR}/bin/status"
+        ;;
+  *)
+        echo $"Usage: ${SCRIPTNAME} {start|stop|restart|status}"
+        exit 1
+esac

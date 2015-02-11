@@ -36,16 +36,28 @@ define adobe_em6::instance::apply_updates (
     fail("'${$title}' needs to contain the 'instance_name' following by '_'")
   }
 
+  File {
+    owner   => $adobe_em6::params::aem_user,
+    group   => $adobe_em6::params::aem_group,
+    mode    => '0644',
+  }
+
   # Using exec rather then wget::Fetch do to the fact that wget:fetch/staging::file checks don't really work correctly.
   # wget::fetch using a uless which seems to run the download every time.
   # staging::file for some reason never uses the wget cache
   exec { "download_${title}_package":
-    command => "wget --no-verbose -N -P '/var/cache/wget' ${adobe_em6::params::remote_url_for_files}/${adobe_em6::params::pkg_aem_jar_name}",
+    command => "wget -N -P /var/cache/wget ${adobe_em6::params::remote_url_for_files}/${filename}",
     cwd     => "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install",
     user    => $adobe_em6::params::aem_user,
-    creates => "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${filename}",
+    onlyif  => "test ! -f ${adobe_em6::params::dir_wget_cache}/${filename}",
     path    => ['/bin', '/usr/bin'],
     require => package[ 'wget' ],
+  }
+
+  file { "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${filename}":
+    ensure  => file,
+    source  => "${adobe_em6::params::dir_wget_cache}/${filename}",
+    require => Exec[ "download_${title}_package" ],
   }
 
 }

@@ -37,14 +37,17 @@ class adobe_em6::params (
   $dir_tools         = "${dir_base_tools}/aem"
   $dir_tools_log     = "${dir_base_logs}/tools"
   $dir_aem_certs     = "${dir_aem_install}/certs"
+  $dir_wget_cache    = '/var/cache/wget'
 
   ## Validation of variables
-  validate_re($adobe_em6::params::aem_user, '^\w\w+$')
-  validate_re($adobe_em6::params::aem_group, '^\w\w+$')
-  validate_absolute_path($adobe_em6::params::dir_aem_install)
-  validate_absolute_path($adobe_em6::params::dir_aem_log)
-  validate_absolute_path($adobe_em6::params::dir_tools)
-  validate_absolute_path($adobe_em6::params::dir_tools_log)
+  validate_re($aem_user, '^\w\w+$')
+  validate_re($aem_group, '^\w\w+$')
+  validate_absolute_path($dir_aem_install)
+  validate_absolute_path($dir_aem_log)
+  validate_absolute_path($dir_tools)
+  validate_absolute_path($dir_tools_log)
+  validate_absolute_path($dir_aem_certs)
+  validate_absolute_path($dir_wget_cache)
 
   ## Checking to ensure remote url is set
   # Need to check for format (i.e. http://blah/blah)
@@ -52,11 +55,12 @@ class adobe_em6::params (
     fail('You have not set "remote_url_for_files" which should be set to the HTTP location and path of the AEM jar')
   }
 
-  $aem_absolute_jar = "${adobe_em6::params::dir_aem_install}/${adobe_em6::params::pkg_aem_jar_name}"
-
   ## Checking Variables for license file.
   if ($license_customer_name == 'UNSET' or $license_product_version == 'UNSET' or $license_downloadid == 'UNSET') {
     fail('You have not set "license_customer_name", "license_product_version", or "license_downloadid"')
   }
+
+  ## Setting up jar locations
+  $aem_absolute_jar = "${dir_wget_cache}/${adobe_em6::params::pkg_aem_jar_name}"
 
 }
