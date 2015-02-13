@@ -47,8 +47,8 @@ define adobe_em6::instance::apply_updates (
   # staging::file for some reason never uses the wget cache
   exec { "download_${title}_package":
     command => "wget -N -P /var/cache/wget ${adobe_em6::params::remote_url_for_files}/${filename}",
-    cwd     => "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install",
-    user    => $adobe_em6::params::aem_user,
+    cwd     => '/var/cache/wget',
+    user    => 'root',
     onlyif  => "test ! -f ${adobe_em6::params::dir_wget_cache}/${filename}",
     path    => ['/bin', '/usr/bin'],
     require => Package[ 'wget' ],
