@@ -40,7 +40,6 @@ class adobe_em6::params (
   $dir_wget_cache    = '/var/cache/wget'
 
   ## Validation of variables
-git clone --branch my_abc http://git.abc.net/git/abc.git  validate_re($aem_group, '^\w\w+$')
   validate_absolute_path($dir_aem_install)
   validate_absolute_path($dir_aem_log)
   validate_absolute_path($dir_tools)
