@@ -28,8 +28,8 @@ class adobe_em6 inherits adobe_em6::params {
   # staging::file for some reason never uses the wget cache
   exec { "download_aem_jar":
     command => "wget -N -P /var/cache/wget ${adobe_em6::params::remote_url_for_files}/${adobe_em6::params::pkg_aem_jar_name}",
-    cwd     => $adobe_em6::params::dir_aem_install,
-    user    => $adobe_em6::params::aem_user,
+    cwd     => '/var/cache/wget',
+    user    => 'root',
     onlyif  => "test ! -f $adobe_em6::params::aem_absolute_jar",
     path    => ['/bin', '/usr/bin'],
     require => Package[ 'wget' ],
