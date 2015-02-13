@@ -51,7 +51,7 @@ define adobe_em6::instance::apply_updates (
     user    => $adobe_em6::params::aem_user,
     onlyif  => "test ! -f ${adobe_em6::params::dir_wget_cache}/${filename}",
     path    => ['/bin', '/usr/bin'],
-    require => package[ 'wget' ],
+    require => Package[ 'wget' ],
   }
 
   file { "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${filename}":

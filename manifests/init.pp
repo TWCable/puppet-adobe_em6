@@ -17,9 +17,6 @@
 #
 class adobe_em6 inherits adobe_em6::params {
 
-  #Need a check for User/Group exists
-  Group <| title == $adobe_em6::params::aem_goup |> -> Pe_accounts::User <| title == $adobe_em6::params::aem_user |>
-
   require adobe_em6::pre_install_directory
   require java
   require wget
@@ -35,7 +32,7 @@ class adobe_em6 inherits adobe_em6::params {
     user    => $adobe_em6::params::aem_user,
     onlyif  => "test ! -f $adobe_em6::params::aem_absolute_jar",
     path    => ['/bin', '/usr/bin'],
-    require => package[ 'wget' ],
+    require => Package[ 'wget' ],
   }
 
 }

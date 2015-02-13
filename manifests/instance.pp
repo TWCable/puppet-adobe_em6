@@ -123,10 +123,6 @@ define adobe_em6::instance (
     $my_port  = $instance_port
   }
 
-  if !($service_enable in ['true', 'false', 'manual']) {
-    fail("'${service_enable}' is not a valid 'enable' property. Should be 'true', 'false' or 'manual'.")
-  }
-
   validate_array($update_list)
 
   ##################################
@@ -155,7 +151,7 @@ define adobe_em6::instance (
     user    => $adobe_em6::params::aem_user,
     creates => "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart",
     path    => ['/bin', '/usr/java/latest/bin/', '/usr/bin'],
-    require => [ exec[ 'download_aem_jar' ], package[ 'java' ] ]
+    require => [ Exec[ 'download_aem_jar' ], Package[ 'java' ] ]
   }
 
   ##################################
@@ -207,6 +203,9 @@ define adobe_em6::instance (
 
   ##################################
   ### Creating AEM service
+  if !($service_enable in ['true', 'false', 'manual']) {
+    fail("'${service_enable}' is not a valid 'enable' property. Should be 'true', 'false' or 'manual'.")
+  }
   file { "/etc/init.d/aem_${title}":
     ensure  => 'present',
     owner   => 'root',
