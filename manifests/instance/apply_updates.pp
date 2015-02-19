@@ -46,7 +46,7 @@ define adobe_em6::instance::apply_updates (
   # wget::fetch using a uless which seems to run the download every time.
   # staging::file for some reason never uses the wget cache
   exec { "download_${title}_package":
-    command => "wget -N -P /var/cache/wget ${adobe_em6::params::remote_url_for_files}/${filename}",
+    command => "wget -N -P ${adobe_em6::params::dir_wget_cache} ${adobe_em6::params::remote_url_for_files}/${filename}",
     cwd     => '/var/cache/wget',
     user    => 'root',
     onlyif  => "test ! -f ${adobe_em6::params::dir_wget_cache}/${filename}",

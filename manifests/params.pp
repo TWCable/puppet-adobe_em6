@@ -59,6 +59,6 @@ class adobe_em6::params (
   }
 
   ## Setting up jar locations
-  $aem_absolute_jar = "${dir_wget_cache}/${adobe_em6::params::pkg_aem_jar_name}"
+  $aem_absolute_jar = "${dir_wget_cache}/${pkg_aem_jar_name}"
 
 }

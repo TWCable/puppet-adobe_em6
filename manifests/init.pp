@@ -27,10 +27,10 @@ class adobe_em6 inherits adobe_em6::params {
   # wget::fetch using a uless which seems to run the download every time.
   # staging::file for some reason never uses the wget cache
   exec { "download_aem_jar":
-    command => "wget -N -P /var/cache/wget ${adobe_em6::params::remote_url_for_files}/${adobe_em6::params::pkg_aem_jar_name}",
-    cwd     => '/var/cache/wget',
+    command => "wget -N -P ${adobe_em6::params::dir_wget_cache} ${adobe_em6::params::remote_url_for_files}/${adobe_em6::params::pkg_aem_jar_name}",
+    cwd     => $adobe_em6::params::dir_wget_cache,
     user    => 'root',
-    onlyif  => "test ! -f $adobe_em6::params::aem_absolute_jar",
+    onlyif  => "test ! -f ${adobe_em6::params::aem_absolute_jar}",
     path    => ['/bin', '/usr/bin'],
     require => Package[ 'wget' ],
   }
