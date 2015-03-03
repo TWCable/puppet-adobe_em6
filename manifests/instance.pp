@@ -73,24 +73,24 @@
   #   instance_port          => '4505',
   #   update_list            => [ 'AEM_6.0_Service_Pack_2-1.0.zip', 'cq-6.0-featurepack-4137-1.0.zip' ]
   # }
+
 define adobe_em6::instance (
-  $instance_type              = 'UNSET',
-  $instance_port              = 'UNSET',
-  $service_enable             = 'true',
-  $service_ensure             = 'UNSET',
-  $start_aem_env              = 'dev',
-  $start_classpath            = '/usr/java/latest/lib/tools.jar',
-  $start_file_size_limit      = '8192',
-  $start_host                 = '',
-  $start_jaas_config          = 'etc/jaas.conf',
-  $start_jvm_aem_args         = '',
-  $start_jvm_keystore_args    = '',
-  $start_jvm_memory_args      = '-Xmx1024m -XX:MaxPermSize=256M',
-  $start_jvm_monitor_args     = '',
-  $start_jvm_property_args    = '',
-  $start_jaas_config          = 'etc/jaas.conf',
-  $start_use_jaas             = '',
-  $update_list                = [ 'AEM_6.0_Service_Pack_2-1.0.zip' ],
+  $instance_type              = hiera('adobe_em6::instance::instance_type', 'UNSET'),
+  $instance_port              = hiera('adobe_em6::instance::instance_port', 'UNSET'),
+  $service_enable             = hiera('adobe_em6::instance::service_enable', 'true'),
+  $service_ensure             = hiera('adobe_em6::instance::service_ensure', 'UNSET'),
+  $start_aem_env              = hiera('adobe_em6::instance::start_aem_env', 'dev'),
+  $start_classpath            = hiera('adobe_em6::instance::start_classpath', '/usr/java/latest/lib/tools.jar'),
+  $start_file_size_limit      = hiera('adobe_em6::instance::start_file_size_limit', '8192'),
+  $start_host                 = hiera('adobe_em6::instance::start_host', ''),
+  $start_jaas_config          = hiera('adobe_em6::instance::start_jaas_config', 'etc/jaas.conf'),
+  $start_jvm_aem_args         = hiera('adobe_em6::instance::start_jvm_aem_args', ''),
+  $start_jvm_keystore_args    = hiera('adobe_em6::instance::start_jvm_keystore_args', ''),
+  $start_jvm_memory_args      = hiera('adobe_em6::instance::start_jvm_memory_args', '-Xmx1024m -XX:MaxPermSize=256M'),
+  $start_jvm_monitor_args     = hiera('adobe_em6::instance::start_jvm_monitor_args', ''),
+  $start_jvm_property_args    = hiera('adobe_em6::instance::start_jvm_property_args', ''),
+  $start_use_jaas             = hiera('adobe_em6::instance::start_use_jaas', ''),
+  $update_list                = hiera('adobe_em6::instance::update_list', [ 'UNSET'] ),
 ) {
 
   require adobe_em6
@@ -160,16 +160,21 @@ define adobe_em6::instance (
   #
   ## This can be converted to an iteration feature starting in Puppet 3.2
   ## for now making the array a hash and using a create_resource to call the define type apply_updates
-  $aem_update_hash = generate_resource_hash($update_list, 'filename', "${title}_update")
 
-  file { "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install":
-    ensure  => 'directory',
-    require => Exec[ "unpack_crx_jar_for_${title}" ],
-  }
+  if ($update_list != [ 'UNSET' ] ) {
 
-  adobe_em6::instance::apply_updates_wrapper { "${title}_update_wrapper":
-    update_hash => $aem_update_hash,
-    require     => File[ "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install" ],
+    $aem_update_hash = generate_resource_hash($update_list, 'filename', "${title}_update")
+
+    file { "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install":
+      ensure  => 'directory',
+      require => Exec[ "unpack_crx_jar_for_${title}" ],
+    }
+
+    adobe_em6::instance::apply_updates_wrapper { "${title}_update_wrapper":
+      update_hash => $aem_update_hash,
+      require     => File[ "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install" ],
+    }
+
   }
 
   ##################################
@@ -221,11 +226,7 @@ define adobe_em6::instance (
       require => File["/etc/init.d/aem_${title}"],
     }
   }
-  else {
-    if !($service_ensure in ['running', 'true', 'stopped', 'false']) {
-      fail("'${service_ensure}' is not a valid 'ensure' property. Should be 'running', 'true', 'stopped' or 'false'.")
-    }
-
+  elsif ($service_ensure in ['running', 'true', 'stopped', 'false']) {
     service { "set up service for ${title}" :
       enable      => $service_enable,
       ensure      => $service_ensure,
@@ -237,6 +238,9 @@ define adobe_em6::instance (
         File["${adobe_em6::params::dir_aem_install}/${title}/license.properties"]
       ]
     }
+  }
+  else {
+    fail("'${service_ensure}' is not a valid 'ensure' property. Should be 'running', 'true', 'stopped' or 'false'.")
   }
 
 }
