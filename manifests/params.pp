@@ -16,13 +16,15 @@
 #
 #
 class adobe_em6::params (
+
+## Parameters used by
   $aem_group                = 'aem',
   $aem_user                 = 'aem',
   $dir_base                 = '/data',
-  $license_customer_name    = UNSET,
-  $license_product_version  = UNSET,
-  $license_downloadid       = UNSET,
-  $remote_url_for_files     = UNSET,
+  $license_customer_name    = 'UNSET',
+  $license_product_version  = 'UNSET',
+  $license_downloadid       = 'UNSET',
+  $remote_url_for_files     = 'UNSET',
   $pkg_aem_jar_name         = 'AEM_6.0_Quickstart.jar',
 ) {
 
