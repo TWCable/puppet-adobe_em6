@@ -33,6 +33,7 @@ class adobe_em6 inherits adobe_em6::params {
     onlyif  => "test ! -f ${adobe_em6::params::aem_absolute_jar}",
     path    => ['/bin', '/usr/bin'],
     require => Package[ 'wget' ],
+    timeout => $adobe_em6::params::download_aem_jar_timeout,
   }
 
 }
