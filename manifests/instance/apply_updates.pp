@@ -21,6 +21,7 @@
 
 define adobe_em6::instance::apply_updates (
   $filename     = UNSET,
+  $timeout      = $adobe_em6::params::download_aem_jar_timeout,
 ) {
 
   if ($filename !~ /.*\.zip/  or $filename == 'UNSET') {
@@ -52,6 +53,7 @@ define adobe_em6::instance::apply_updates (
     onlyif  => "test ! -f ${adobe_em6::params::dir_wget_cache}/${filename}",
     path    => ['/bin', '/usr/bin'],
     require => Package[ 'wget' ],
+    timeout => $timeout,
   }
 
   file { "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${filename}":
