@@ -90,7 +90,7 @@ define adobe_em6::instance (
   $start_jvm_monitor_args     = hiera('adobe_em6::instance::start_jvm_monitor_args', ''),
   $start_jvm_property_args    = hiera('adobe_em6::instance::start_jvm_property_args', ''),
   $start_use_jaas             = hiera('adobe_em6::instance::start_use_jaas', ''),
-  $update_list                = hiera('adobe_em6::instance::update_list', [ 'UNSET'] ),
+  $update_list                = hiera('adobe_em6::instance::update_list', [ 'UNSET' ] ),
 ) {
 
   require adobe_em6

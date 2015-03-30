@@ -6,6 +6,7 @@ shared_examples_for "adobe_em6::instance tests" do
     "#{aem_type}"
   end
 
+
   it {
     should contain_file("#{dir_aem_install}/#{aem_type}").with(
       'ensure'  => 'directory',
@@ -47,6 +48,7 @@ describe 'adobe_em6::instance' do
   let(:aem_user)              { 'aem' }
   let(:dir_aem_install)       { '/data/apps/aem' }
   let(:dir_aem_log)           { '/data/logs/aem' }
+  #let(:adobe::params::remote_url_for_files)      { 'http://relic-01.cdp.webapps.rr.com/artifactory/files-local/adobe/aem/6.0' }
 
   context 'using title of author to set configuration' do
     let(:aem_port)       { '4502' }
