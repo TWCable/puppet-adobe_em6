@@ -52,6 +52,7 @@ define adobe_em6::instance::apply_updates (
     user    => 'root',
     onlyif  => "test ! -f ${adobe_em6::params::dir_wget_cache}/${filename}",
     path    => ['/bin', '/usr/bin'],
+    timeout => 1800,
     require => Package[ 'wget' ],
     timeout => $timeout,
   }
