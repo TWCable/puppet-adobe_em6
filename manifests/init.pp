@@ -34,7 +34,6 @@ class adobe_em6 inherits adobe_em6::params {
     path    => ['/bin', '/usr/bin'],
     require => Package[ 'wget' ],
     timeout => $adobe_em6::params::download_aem_jar_timeout,
-    timeout => 1800,
   }
 
 }
