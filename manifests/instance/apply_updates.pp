@@ -45,20 +45,29 @@ define adobe_em6::instance::apply_updates (
   # Using exec rather then wget::Fetch do to the fact that wget:fetch/staging::file checks don't really work correctly.
   # wget::fetch using a uless which seems to run the download every time.
   # staging::file for some reason never uses the wget cache
+  $cache_hotfix_filename    = "${adobe_em6::params::dir_wget_cache}/${filename}"
+  $launchpad_timestamp_file = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/launchpad/conf/launchpad-timestamp.txt"
+  $install_hotfix_filename  = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${filename}"
+
   exec { "download_${title}_package":
     command => "wget -N -P ${adobe_em6::params::dir_wget_cache} ${adobe_em6::params::remote_url_for_files}/${filename}",
     cwd     => '/var/cache/wget',
     user    => 'root',
-    onlyif  => "test ! -f ${adobe_em6::params::dir_wget_cache}/${filename}",
+    onlyif  => "test ! -f ${$cache_hotfix_filename}",
     path    => ['/bin', '/usr/bin'],
     timeout => $adobe_em6::params::exec_download_timeout,
     require => Package[ 'wget' ],
   }
 
-  file { "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${filename}":
-    ensure  => file,
-    source  => "${adobe_em6::params::dir_wget_cache}/${filename}",
-    require => Exec[ "download_${title}_package" ],
+  ## In order to ensure hotfixes don't get add prior to inital start we have
+  ## added a check on a file create after start up by AEM
+  exec { "copy_${filename}_hotfix_for_${instance_name}":
+    command => "cp -f ${cache_hotfix_filename} ${install_hotfix_filename}",
+    cwd     => "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/",
+    user    => $adobe_em6::params::aem_user,
+    unless  => [ "/usr/bin/test ! -f ${launchpad_timestamp_file}", "/usr/bin/test -f ${install_hotfix_filename}" ],
+    path    => [ '/bin', '/usr/bin' ],
+    require => Exec [ "download_${title}_package" ],
   }
 
 }

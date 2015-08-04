@@ -3,7 +3,12 @@
 # This class set various Parameters for the Adobe_em6 module
 #
 # == Parameters:
-# [*dir_base*] - Group used by application (default: /data)
+# [*dir_base*]
+#   Group used by application (default: /data)
+# [*jks_source_location*]
+#   Set this parameter if you would like to use a JKS for https configurations
+#   The file is NOT kept within this module and shouldn't be (default: UNSET)
+#   example puppet:///modules/name_of_module/filename
 
 # === Examples
 #
@@ -22,6 +27,7 @@ class adobe_em6::params (
   $aem_user                 = 'aem',
   $dir_base                 = '/data',
   $exec_download_timeout    = 1200,  # 20 minutes
+  $jks_source_location      = 'UNSET',
   $license_customer_name    = 'UNSET',
   $license_product_version  = 'UNSET',
   $license_downloadid       = 'UNSET',
@@ -39,7 +45,7 @@ class adobe_em6::params (
   $dir_aem_log       = "${dir_base_logs}/aem"
   $dir_tools         = "${dir_base_tools}/aem"
   $dir_tools_log     = "${dir_base_logs}/tools"
-  $dir_aem_certs     = "${dir_aem_install}/certs"
+  $dir_aem_certs     = "${dir_base_apps}/certs"
   $dir_wget_cache    = '/var/cache/wget'
 
   ## Validation of variables

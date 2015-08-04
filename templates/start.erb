@@ -12,12 +12,12 @@ fi
 ## AEM Specific settings
 CQ_FILE_SIZE_LIMIT="<%= @start_file_size_limit %>"
 CQ_PORT="<%= @my_port %>"
-CQ_RUNMODE="<%= @my_type %>"
 CQ_HOST="<%= @start_host %>"
 CQ_USE_JAAS="<%= @start_use_jaas %>"
 CQ_JAAS_CONFIG="<%= @start_jaas_config %>"
 
-AEM_ENV=<%= @start_aem_env %>
+MORE_MODES="<%= @start_more_modes %>"
+
 CLASSPATH=${CLASSPATH}:<%= @start_classpath  %>
 
 ## Parameters for JVM
@@ -28,7 +28,7 @@ JVM_MONITOR_ARGS="<%= @start_jvm_monitor_args %>"
 JVM_PROPERTY_ARGS="<%= @start_jvm_property_args %>"
 
 CQ_JVM_OPTS="-server ${JVM_MEMORY_ARGS} ${JVM_PROPERTY_ARGS} -Djava.awt.headless=true ${JVM_AEM_ARGS} ${JVM_MONITOR_ARGS} ${JVM_KEYSTORE_ARGS}"
-CQ_RUNMODE="${CQ_RUNMODE},nosamplecontent,${AEM_ENV}"
+CQ_RUNMODE="<%= @my_type %>,nosamplecontent,${MORE_MODES}"
 
 # ------------------------------------------------------------------------------
 # do not configure below this point

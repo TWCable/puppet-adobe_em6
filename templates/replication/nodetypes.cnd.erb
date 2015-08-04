@@ -1,0 +1,33 @@
+<'cq'='http://www.day.com/jcr/cq/1.0'>
+<'nt'='http://www.jcp.org/jcr/nt/1.0'>
+<'jcr'='http://www.jcp.org/jcr/1.0'>
+<'rep'='internal'>
+<'sling'='http://sling.apache.org/jcr/sling/1.0'>
+
+[cq:Page] > nt:hierarchyNode
+  orderable primaryitem jcr:content
+  + * (nt:base) = nt:base version
+  + jcr:content (nt:base) = nt:unstructured
+
+[rep:Privileges]
+  - rep:next (long) mandatory protected multiple
+  + * (rep:Privilege) = rep:Privilege protected abort
+
+[rep:Privilege]
+  - rep:isAbstract (boolean) protected
+  - rep:aggregates (name) protected multiple
+  - rep:bits (long) mandatory protected multiple
+
+[sling:OrderedFolder] > sling:Folder
+  orderable
+  + * (nt:base) = sling:OrderedFolder version
+
+[sling:Folder] > nt:folder
+  - * (undefined) multiple
+  - * (undefined)
+  + * (nt:base) = sling:Folder version
+
+[rep:RepoAccessControllable]
+  mixin
+  + rep:repoPolicy (rep:Policy) protected ignore
+

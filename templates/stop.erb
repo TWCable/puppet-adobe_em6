@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# This script stops the (running) application
+#
+
+WAIT_FOR="<%= @stop_wait_for %>"
+BIN_PATH=$(readlink --canonicalize $(dirname $0))
+cd $BIN_PATH/..
+START_OPTS='stop -c .'
+if [ -z $CQ_JARFILE ]; then
+    CQ_JARFILE=`ls app/*.jar | head -1`
+fi
+java -jar $CQ_JARFILE $START_OPTS
+
+STATUS=0
+COUNT=0
+while [[ "${STATUS}" == "0" && ${COUNT} -lt ${WAIT_FOR} ]]; do
+    sleep 1
+    OUTPUT=$(${BIN_PATH}/status)
+    STATUS=$?
+    if [[ $((${COUNT}%10)) -eq 0 ]]; then
+        echo "${OUTPUT}"
+    fi
+    let COUNT=$((${COUNT}+1))
+done
+echo "${OUTPUT}"
+
+if [[ ${STATUS} == "0" ]]; then
+    echo "Application still running.  Trying to kill the process..."
+    echo "Stop command returned ${STOP_CODE}. Trying to kill the process..."
+    PID=$(cat conf/cq.pid 2>/dev/null)
+    rm -f conf/cq.pid
+    if [ "$PID" ]; then
+        if ps -p $PID > /dev/null 2>&1; then
+            kill $PID
+            STOP_CODE=$?
+            echo "process ${PID} was killed"
+        else
+           echo "process ${PID} not running"
+            STOP_CODE=4
+        fi
+    else
+        echo "cq.pid not found"
+        STOP_CODE=4
+    fi
+else
+    echo "Application not running"
+fi
+
+exit ${STOP_CODE}
