@@ -36,11 +36,18 @@ class adobe_em6 inherits adobe_em6::params {
     timeout => $adobe_em6::params::exec_download_timeout,
   }
 
-  if $adobe_em6::params::jks_source_location != 'UNSET' {
-
+  if $adobe_em6::params::keystore_source_location != 'UNSET' {
     file { "${dir_aem_certs}/aem_keystore.jks":
       ensure  => 'present',
-      source  => "${adobe_em6::params::jks_source_location}",
+      source  => "${adobe_em6::params::keystore_source_location}",
+      require => File[ $dir_aem_certs ],
+    }
+  }
+
+  if $adobe_em6::params::truststore_source_location != 'UNSET' {
+    file { "${dir_aem_certs}/aem_truststore.jks":
+      ensure  => 'present',
+      source  => "${adobe_em6::params::truststore_source_location}",
       require => File[ $dir_aem_certs ],
     }
   }

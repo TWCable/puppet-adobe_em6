@@ -23,16 +23,17 @@
 class adobe_em6::params (
 
 ## Parameters used by
-  $aem_group                = 'aem',
-  $aem_user                 = 'aem',
-  $dir_base                 = '/data',
-  $exec_download_timeout    = 1200,  # 20 minutes
-  $jks_source_location      = 'UNSET',
-  $license_customer_name    = 'UNSET',
-  $license_product_version  = 'UNSET',
-  $license_downloadid       = 'UNSET',
-  $remote_url_for_files     = 'UNSET',
-  $pkg_aem_jar_name         = 'AEM_6.0_Quickstart.jar',
+  $aem_group                  = 'aem',
+  $aem_user                   = 'aem',
+  $dir_base                   = '/data',
+  $exec_download_timeout      = 1200,  # 20 minutes
+  $keystore_source_location   = 'UNSET',
+  $license_customer_name      = 'UNSET',
+  $license_product_version    = 'UNSET',
+  $license_downloadid         = 'UNSET',
+  $remote_url_for_files       = 'UNSET',
+  $pkg_aem_jar_name           = 'AEM_6.0_Quickstart.jar',
+  $truststore_source_location = 'UNSET',
 ) {
 
   # Setting Various base directories used by the installer
