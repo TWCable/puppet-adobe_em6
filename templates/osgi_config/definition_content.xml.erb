@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:vlt="http://www.day.com/jcr/vault/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:created="{Date}2015-08-19T18:55:56.214Z"
+    jcr:createdBy="admin"
+    jcr:description="<%= @title %> was created by Puppet Agent on <%= @fqdn %>"
+    jcr:lastModified="{Date}2015-08-19T18:55:56.214Z"
+    jcr:lastModifiedBy="admin"
+    jcr:primaryType="vlt:PackageDefinition"
+    acHandling="overwrite"
+    buildCount="1"
+    builtWith="Adobe Experience Manager-6.1.0.20150528"
+    fixedBugs=""
+    group="osgi_configs"
+    lastUnwrapped="{Date}2015-08-19T18:55:56.214Z"
+    lastUnwrappedBy="admin"
+    lastWrapped="{Date}2015-08-19T18:55:56.214Z"
+    lastWrappedBy="admin"
+    providerLink=""
+    providerName="<%= @title %>_osgi_config"
+    name="<%= @title %>_osgi_config"
+    version="1.0">
+    <filter jcr:primaryType="nt:unstructured">
+        <f0
+            jcr:primaryType="nt:unstructured"
+            mode="replace"
+            root="/apps/system/config/<%= @title %>"
+            rules="[]"/>
+    </filter>
+    <screenshots jcr:primaryType="nt:unstructured"/>
+</jcr:root>

@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:vlt="http://www.day.com/jcr/vault/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
-    jcr:primaryType="vlt:PackageDefinition"
+<jcr:root xmlns:vlt="http://www.day.com/jcr/vault/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    author="Puppet Agent"
     buildCount="1"
     builtWith="Adobe Experience Manager-6.0.0.SP2"
-    group="my_packages"
+    dependencies="[]"
+    group="replication_queues"
+    jcr:description="<%= @title %> replicaiton queue was created by Puppet Agent on <%= @fqdn %>"
+    jcr:primaryType="vlt:PackageDefinition"
     name="<%= @title %>_replication"
+    path="/etc/packages/replication_queues"
+    providerName="TWC Puppet"
+    requiresRestart="{Boolean}false"
     version="1.0">
     <filter jcr:primaryType="nt:unstructured">
         <f0

@@ -2,16 +2,17 @@
 <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
     jcr:primaryType="cq:Page">
     <jcr:content
+        cq:lastModifiedBy="admin"
         cq:template="/libs/cq/replication/templates/agent"
         jcr:description="Puppet created Agent. <%= @jcr_description %>"
         jcr:primaryType="nt:unstructured"
         jcr:title="<%= @title %>"
-        sling:resourceType="cq/replication/components/agent"
         enabled="<%= @queue_enabled %>"
         logLevel="<%= @log_level %>"
         protocolHTTPExpired="<%= @protocol_http_expired %>"
         retryDelay="<%= @retry_delay %>"
         serializationType="durbo"
+        sling:resourceType="cq/replication/components/agent"
         transportPassword="<%= @transport_password %>"
         transportUri="<%= @transport_uri %>"
         transportUser="<%= @transport_user %>"/>

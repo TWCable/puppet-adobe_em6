@@ -16,7 +16,7 @@
 [ ${NETWORKING} = "no" ] && exit 0
 
 SCRIPTNAME=$0
-INSTANCENAME="<%= @title %>"
+INSTANCENAME="<%= @instance_name %>"
 PROG=$"CQ5 ${INSTANCENAME} instance."
 STARTUPDIR="<%= scope['::adobe_em6::params::dir_aem_install'] %>/${INSTANCENAME}/crx-quickstart"
 

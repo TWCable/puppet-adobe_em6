@@ -17,7 +17,7 @@
 # [*start_more_modes*]
 #   A comma seperate lines (no spaces) of runmodes.
 #   Set your environment name that will be used by OSGi configs& other modes.
-#   This is used in the start.erb template.
+#   This is used in the start.erb template and author and publish are in the list by default.
 # [*start_classpath*]
 #   Start template variable to add jars to the classpath
 # [*start_file_size_limit*]
@@ -41,8 +41,8 @@
 #   Start template variable to enable the use of the JAAS configuration file.
 # [*stop_wait_for*]
 #   Stop template variable to set the number of seconds to wait for JAVA stop.
-# [*update_liste*]
-#   An array of AEM update, service packs, and hotfixes filenames
+# [*package_list*]
+#   An array of AEM packages, service packs, and hotfixes filenames
 #
 # === External Parameters
 
@@ -78,8 +78,8 @@
   # adobe_em6::instance { 'publish01':
   #   instance_type          => 'publish',
   #   instance_port          => '4505',
-  #   update_list            => [ 'AEM_6.0_Service_Pack_2-1.0.zip',
-  #                               'cq-6.0-featurepack-4137-1.0.zip' ]
+  #   package_list            => [ 'AEM_6.0_Service_Pack_2-1.0.zip',
+  #                               'http://myserver.com/cq-6.0-featurepack-4137-1.0.zip' ]
   # }
 
 ### TODO: Need to determine if there is a better way to do global variables
@@ -87,6 +87,7 @@
 define adobe_em6::instance (
   $instance_type              = hiera('adobe_em6::instance::instance_type', 'UNSET'),
   $instance_port              = hiera('adobe_em6::instance::instance_port', 'UNSET'),
+  $osgi_config_list           = hiera_hash('adobe_em6::instance::osgi_config_list', {} ),
   $replication_queues         = hiera_hash('adobe_em6::instance::replication_queues', {} ),
   $service_enable             = hiera('adobe_em6::instance::service_enable', 'true'),
   $service_ensure             = hiera('adobe_em6::instance::service_ensure', 'UNSET'),
@@ -102,7 +103,7 @@ define adobe_em6::instance (
   $start_more_modes           = hiera('adobe_em6::instance::start_more_modes', 'dev'),
   $start_use_jaas             = hiera('adobe_em6::instance::start_use_jaas', ''),
   $stop_wait_for              = hiera('adobe_em6::instance::stop_wait_for', '120'),
-  $update_list                = hiera_array('adobe_em6::instance::update_list', [ 'UNSET' ] ),
+  $package_list                = hiera_array('adobe_em6::instance::package_list', [ 'UNSET' ] ),
 ) {
 
   require adobe_em6
@@ -138,8 +139,6 @@ define adobe_em6::instance (
     $my_port  = $instance_port
   }
 
-  validate_array($update_list)
-
   ##################################
   ###  Instance's directory creation
   File {
@@ -171,7 +170,7 @@ define adobe_em6::instance (
 
   ##################################
   ### Applying Packages
-  ## Creating install directory and downloading update packages.
+  ## Creating install directory and downloading packages.
   #
   file { "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install":
     ensure  => 'directory',
@@ -180,16 +179,17 @@ define adobe_em6::instance (
 
   ## TODO: This can be converted to an iteration feature starting in Puppet 3.2
   ##        for now making the array a hash and using a create_resource to call
-  ##        the define type apply_updates
-  if ($update_list != [ 'UNSET' ] ) {
+  ##        the define type apply_packages
+  if ($package_list != [ 'UNSET' ] ) {
 
-    $aem_update_hash = generate_resource_hash($update_list, 'filename', "${title}_update")
-    $apply_updates_defaults = {
+    validate_array($package_list)
+    $aem_packages_hash = generate_resource_hash($package_list, 'filename', "${title}_package")
+    $apply_packages_defaults = {
       'before'  => Service["set up service for ${title}"],
       'require' => File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"],
     }
 
-    create_resources('adobe_em6::instance::apply_updates', $aem_update_hash, $apply_updates_defaults)
+    create_resources('adobe_em6::instance::apply_packages', $aem_packages_hash, $apply_packages_defaults)
 
   }
 
@@ -207,9 +207,22 @@ define adobe_em6::instance (
     create_resources('adobe_em6::instance::replication_queues', $replication_queues, $replication_queues_defaults)
   }
 
+  ### Creating replications queues for instances
+  if !empty($osgi_config_list) {
+    validate_hash($osgi_config_list)
+
+    $osgi_config_defaults = {
+      'instance_name' => $title,
+      'before'        => Service["set up service for ${title}"],
+      'require'       => File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"],
+    }
+
+    create_resources('adobe_em6::instance::apply_osgi_config', $osgi_config_list, $osgi_config_defaults)
+  }
+
   ##################################
   ### Customizing AEM files
-  ## Having scope issue with templates using instance/post_intall_config.pp
+  ## Having scope issue with templates using instance/post_install_config.pp
   ## and reference instance params.
   file { "${adobe_em6::params::dir_aem_install}/${title}/license.properties":
     ensure  => 'present',
@@ -237,49 +250,15 @@ define adobe_em6::instance (
     require => Exec[ "unpack_crx_jar_for_${title}" ],
   }
 
-  #Files to add:
-  #config/sling.properties
-  #What file are now workspace.xml and repository.xml
-  #What about custom configurations
+  # TODO: Files to add:
+  # config/* & sling.properties
+  # What about custom configurations
 
   ##################################
   ### Creating AEM service
-  ## Need to move to  instance/service.pp
-  if !($service_enable in ['true', 'false', 'manual']) {
-    fail("'${service_enable}' is not a valid 'enable' property.
-     Should be 'true', 'false' or 'manual'.")
-  }
-  file { "/etc/init.d/aem_${title}":
-    ensure  => 'present',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0744',
-    content => template('adobe_em6/aem_type.erb'),
-  }
-
-  if ($service_ensure == 'UNSET') {
-    service { "set up service for ${title}" :
-      enable  => $service_enable,
-      name    => "aem_${title}",
-      require => File["/etc/init.d/aem_${title}"],
-    }
-  }
-  elsif ($service_ensure in ['running', 'true', 'stopped', 'false']) {
-    service { "set up service for ${title}" :
-      ensure      => $service_ensure,
-      enable      => $service_enable,
-      hasrestart  => true,
-      hasstatus   => true,
-      name        => "aem_${title}",
-      require     => [ File["/etc/init.d/aem_${title}"],
-        File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/bin/start"],
-        File["${adobe_em6::params::dir_aem_install}/${title}/license.properties"]
-      ]
-    }
-  }
-  else {
-    fail("'${service_ensure}' is not a valid 'ensure' property. Should be
-      'running', 'true', 'stopped' or 'false'.")
+  adobe_em6::instance::service { "${title}_service_creation":
+    service_enable  => $service_enable,
+    service_ensure  => $service_ensure,
   }
 
 }

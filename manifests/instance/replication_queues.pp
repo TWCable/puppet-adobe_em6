@@ -130,6 +130,12 @@ define adobe_em6::instance::replication_queues (
     require => File[ "${tmp_queue_dir}/${title}/META-INF/vault" ],
   }
 
+  file { "${tmp_queue_dir}/${title}/META-INF/vault/settings.xml":
+    ensure  => 'present',
+    content => template('adobe_em6/replication/settings.xml.erb'),
+    require => File[ "${tmp_queue_dir}/${title}/META-INF/vault" ],
+  }
+
   file { "${tmp_queue_dir}/${title}/META-INF/vault/definition/.content.xml":
     ensure  => 'present',
     content => template('adobe_em6/replication/definition_content.xml.erb'),
@@ -147,6 +153,13 @@ define adobe_em6::instance::replication_queues (
     user    => 'aem',
     unless  => [ "/usr/bin/test ! -f ${launchpad_timestamp_file}", "/usr/bin/test -f ${output_file}" ],
     path    => ['/bin', '/usr/bin'],
+    require => [  File[ "${tmp_queue_dir}/${title}/META-INF/vault/definition/.content.xml" ],
+                  File[ "${tmp_queue_dir}/${title}/META-INF/vault/settings.xml" ],
+                  File[ "${tmp_queue_dir}/${title}/META-INF/vault/properties.xml" ],
+                  File[ "${tmp_queue_dir}/${title}/META-INF/vault/nodetypes.cnd" ],
+                  File[ "${tmp_queue_dir}/${title}/META-INF/vault/filter.xml" ],
+                  File[ "${tmp_queue_dir}/${title}/META-INF/vault/config.xml" ],
+                  File[ "${tmp_queue_dir}/${title}/jcr_root/etc/replication/agents.${instance_type}/${title}/.content.xml" ] ]
   }
 
 }
