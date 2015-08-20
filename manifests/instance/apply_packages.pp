@@ -47,7 +47,7 @@ define adobe_em6::instance::apply_packages (
   }
   else {
     $my_filename  = $filename
-    $my_url       = $adobe_em6::params::remote_url_for_files
+    $my_url       = "${adobe_em6::params::remote_url_for_files}/${my_filename}"
   }
 
   File {
