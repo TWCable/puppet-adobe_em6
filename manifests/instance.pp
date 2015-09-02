@@ -174,7 +174,7 @@ define adobe_em6::instance (
   #
   file { "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install":
     ensure  => 'directory',
-    require => Exec[ "unpack_crx_jar_for_${title}" ],
+    require => Exec[ "unpack_crx_jar_for_${title}" ]
   }
 
   ## TODO: This can be converted to an iteration feature starting in Puppet 3.2

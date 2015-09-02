@@ -10,7 +10,7 @@
 # [*instance_name*]
 #   Name of your instance.
 # [*osgi_config*]
-#   Name of your instance.
+#   Name of your configuration.
 #
 # === External Parameters
 #
@@ -23,7 +23,6 @@
 #
 # === Examples:
 #
-
 define adobe_em6::instance::apply_osgi_config (
   $ensure_osgi    = 'present',
   $instance_name  = 'UNSET',
@@ -33,6 +32,13 @@ define adobe_em6::instance::apply_osgi_config (
   # Using a locally scope variable to avoid longer dir names
   $tmp_osgi_dir    = "${adobe_em6::params::dir_aem_install}/${instance_name}/osgi_tmp"
 
+  ###############################################################
+  #### Various properties we will need for configuration creation
+
+  # Creates a unique identifier for a configuration.  This is useful for applying unique packages for configuration updates
+  $uuid = random(99999) 
+  $time = generate("/bin/date", "+%Y-%M-%d-%T")
+
   ##################################
   ### Instance's directory creation
   ### Need to created a directories so that a packages can be built
@@ -40,6 +46,11 @@ define adobe_em6::instance::apply_osgi_config (
     owner   => $adobe_em6::params::aem_user,
     group   => $adobe_em6::params::aem_group,
     mode    => '0755',
+  }
+
+  Exec {
+    user   => $adobe_em6::params::aem_user,
+    group   => $adobe_em6::params::aem_group
   }
 
   ensure_resource('file', $tmp_osgi_dir, {
@@ -93,7 +104,7 @@ define adobe_em6::instance::apply_osgi_config (
   file { "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config/${title}.xml":
     ensure  => 'present',
     content => template('adobe_em6/osgi_config/osgi.xml.erb'),
-    require => File[ "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config" ],
+    require => File[ "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config" ]
   }
 
   file { "${tmp_osgi_dir}/${title}/META-INF/vault/config.xml":
@@ -132,39 +143,36 @@ define adobe_em6::instance::apply_osgi_config (
     require => File[ "${tmp_osgi_dir}/${title}/META-INF/vault/definition" ],
   }
 
-  $output_file = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${title}_osgi_config.zip"
+  $package_zip_install_folder = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/"
+  $package_zip_file = "${title}_${uuid}_osgi_config.zip"
+
+  ### Create package to be used to install into instance
+  ###
+  $launchpad_timestamp_file = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/launchpad/conf/launchpad-timestamp.txt"
+  $requiredFiles = [  File[ "${tmp_osgi_dir}/${title}/META-INF/vault/definition/.content.xml" ],
+                      File[ "${tmp_osgi_dir}/${title}/META-INF/vault/settings.xml" ],
+                      File[ "${tmp_osgi_dir}/${title}/META-INF/vault/properties.xml" ],
+                      File[ "${tmp_osgi_dir}/${title}/META-INF/vault/nodetypes.cnd" ],
+                      File[ "${tmp_osgi_dir}/${title}/META-INF/vault/filter.xml" ],
+                      File[ "${tmp_osgi_dir}/${title}/META-INF/vault/config.xml" ],
+                      File[ "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config/${title}.xml" ] ]
+
+
+  exec { "Package/Deploy OSGI Config for ${title}":
+    command => "/bin/rm -rf *.zip;/usr/bin/zip -r ${package_zip_file} *;/bin/cp ${package_zip_file} ${package_zip_install_folder}", 
+    cwd     => "${tmp_osgi_dir}/${title}",
+    unless  => "/usr/bin/test ! -f ${launchpad_timestamp_file}", 
+    onlyif => "/usr/bin/test ${ensure_osgi} = present", #For some reason, this test does not work if placed within an 'unless' block, but works if in 'onlyif'?
+    subscribe => $requiredFiles,
+    require => $requiredFiles, 
+    refreshonly => true
+  }
+
 
   if ("${ensure_osgi}" == 'absent') {
-
-    file { $output_file:
+    file { "${package_zip_install_folder}${package_zip_file}":
       ensure  => 'absent',
     }
-
-  }
-  elsif ("${ensure_osgi}" in ['present', 'file' ]) {
-    ### Create package to be used to install into instance
-    ###
-    $launchpad_timestamp_file = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/launchpad/conf/launchpad-timestamp.txt"
-
-    exec { "create_${title}_osgi_config_package":
-      command => "zip -rq ${output_file} *",
-      cwd     => "${tmp_osgi_dir}/${title}",
-      user    => 'aem',
-      unless  => [ "/usr/bin/test ! -f ${launchpad_timestamp_file}", "/usr/bin/test -f ${output_file}" ],
-      path    => ['/bin', '/usr/bin'],
-      require => [  File[ "${tmp_osgi_dir}/${title}/META-INF/vault/definition/.content.xml" ],
-                    File[ "${tmp_osgi_dir}/${title}/META-INF/vault/settings.xml" ],
-                    File[ "${tmp_osgi_dir}/${title}/META-INF/vault/properties.xml" ],
-                    File[ "${tmp_osgi_dir}/${title}/META-INF/vault/nodetypes.cnd" ],
-                    File[ "${tmp_osgi_dir}/${title}/META-INF/vault/filter.xml" ],
-                    File[ "${tmp_osgi_dir}/${title}/META-INF/vault/config.xml" ],
-                    File[ "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config/${title}.xml" ] ]
-    }
-
-  }
-  else {
-    fail("'${ensure_osgi}' is not a valid 'ensure' property. Should be
-      'absent', 'present' or 'file'.")
   }
 
 }
