@@ -54,8 +54,7 @@ class adobe_em6 inherits adobe_em6::params {
 
   file { "${adobe_em6::params::dir_tool}/aem_bundle_status.rb":
     ensure  => 'present',
-    content => template('adobe_em6/aem_bundle_status.rb.erb'),
+    source  => 'puppet:///modules/adobe_em6/aem_bundle_status.rb',
     require => File[ $adobe_em6::params::dir_tools ],
   }
-
 }
