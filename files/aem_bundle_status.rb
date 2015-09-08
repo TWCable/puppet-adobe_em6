@@ -9,9 +9,9 @@ class AemBundleStatus
 
 	def self.get_bundles_status(bundles_uri, user, pass)
 		uri = URI.parse(bundles_uri)
-		req = Net::HTTP::Get.new(uri)
+		req = Net::HTTP::Get.new(uri.path)
 		req.basic_auth user, pass
-		res = Net::HTTP.start(uri.hostname, uri.port) { |http|
+		res = Net::HTTP.start(uri.host, uri.port) { |http|
 	  		http.request(req)
 		}
 
