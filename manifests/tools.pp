@@ -15,7 +15,7 @@
 #
 class adobe_em6::tools {
 
-  file { "${adobe_em6::params::dir_tool}/aem_bundle_status.rb":
+  file { "${adobe_em6::params::dir_tools}/aem_bundle_status.rb":
     ensure  => 'present',
     source  => 'puppet:///modules/adobe_em6/aem_bundle_status.rb',
     require => File[ $adobe_em6::params::dir_tools ],
