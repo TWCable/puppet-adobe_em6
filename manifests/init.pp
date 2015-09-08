@@ -20,6 +20,7 @@ class adobe_em6 inherits adobe_em6::params {
   require adobe_em6::pre_install_directory
   require java
   require wget
+  include adobe_em6::tools
 
   # May want to add a log message to client to show that it downloading as long as it
   # doesn't cause the report to look like an resource has changed
