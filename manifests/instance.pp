@@ -160,7 +160,7 @@ define adobe_em6::instance (
   ##################################
   ### Jar Unpacking
   exec { "unpack_crx_jar_for_${title}":
-    command => "/usr/bin/java -jar ${adobe_em6::params::aem_absolute_jar} -unpack; sleep 5",
+    command => "/usr/bin/java -jar ${adobe_em6::params::aem_absolute_jar} -unpack; sleep 20",
     cwd     => "${adobe_em6::params::dir_aem_install}/${title}",
     user    => $adobe_em6::params::aem_user,
     creates => "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/repository/",
