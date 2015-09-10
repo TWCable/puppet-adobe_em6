@@ -68,4 +68,7 @@ class adobe_em6::params (
     fail('You have not set "license_customer_name", "license_product_version", or "license_downloadid"')
   }
 
+  # ## Setting up jar locations
+  # $aem_absolute_jar = "${dir_wget_cache}/${pkg_aem_jar_name}"
+
 }
