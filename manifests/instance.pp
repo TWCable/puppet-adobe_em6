@@ -158,20 +158,36 @@ define adobe_em6::instance (
   }
 
   ##################################
-  ### Jar Unpacking
+  ### Downloading and Jar Unpacking
+  # TODO: Add a log message to client to show that it downloading as long as it
+  #       doesn't cause the report to look like an resource has changed
+  $dir_instance_location = "${adobe_em6::params::dir_aem_install}/${title}"
+  $dir_instance_repo_loc = "${dir_instance_location}/crx-quickstart/repository/"
+  $aem_absolute_jar      = "${dir_instance_location}/${pkg_aem_jar_name}"
+  $exec_path             = ['/bin', '/usr/bin', '/usr/local/bin', '/usr/java/latest/bin/' ]
+
+  exec { "download_aem_jar_${title}":
+    command   => "wget -N -P ${dir_instance_location} ${adobe_em6::params::remote_url_for_files}/${adobe_em6::params::pkg_aem_jar_name}",
+    cwd       => $dir_instance_location,
+    logoutput => true,
+    onlyif    => [ "test ! -f ${aem_absolute_jar}", "test ! -f ${dir_instance_repo_loc}" ],
+    path      =>  $exec_path,
+    require   => Package[ 'wget' ],
+    timeout   => $adobe_em6::params::exec_download_timeout,
+  }
+
   exec { "unpack_crx_jar_for_${title}":
-    command => "/usr/bin/java -jar ${adobe_em6::params::aem_absolute_jar} -unpack; sleep 5",
-    cwd     => "${adobe_em6::params::dir_aem_install}/${title}",
-    user    => $adobe_em6::params::aem_user,
-    creates => "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/repository/",
-    path    => ['/bin', '/usr/java/latest/bin/', '/usr/bin'],
-    require => [ Exec[ 'download_aem_jar' ], Package[ 'java' ] ]
+    command   => "/usr/bin/java -jar ${aem_absolute_jar} -unpack; sleep 5",
+    creates   => "test ! -f ${dir_instance_repo_loc}",
+    cwd       => $dir_instance_location,
+    logoutput => true,
+    path      =>  $exec_path,
+    require   => [ Exec[ 'download_aem_jar' ], Package[ 'java' ] ],
   }
 
   ##################################
   ### Applying Packages
   ## Creating install directory and downloading packages.
-  #
   file { "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install":
     ensure  => 'directory',
     require => Exec[ "unpack_crx_jar_for_${title}" ]
