@@ -148,7 +148,6 @@ define adobe_em6::instance::apply_osgi_config (
 
   ### Create package to be used to install into instance
   ###
-  $launchpad_timestamp_file = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/launchpad/conf/launchpad-timestamp.txt"
   $requiredFiles = [  File[ "${tmp_osgi_dir}/${title}/META-INF/vault/definition/.content.xml" ],
                       File[ "${tmp_osgi_dir}/${title}/META-INF/vault/settings.xml" ],
                       File[ "${tmp_osgi_dir}/${title}/META-INF/vault/properties.xml" ],
@@ -157,15 +156,24 @@ define adobe_em6::instance::apply_osgi_config (
                       File[ "${tmp_osgi_dir}/${title}/META-INF/vault/config.xml" ],
                       File[ "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config/${title}.xml" ] ]
 
+  if($instance_name == 'publish') {
+    $port = "4503"
+  }
+  else {
+    $port = "4502"
+  }
 
+  ## Use aem_bundle_status.rb to make sure AEM has started up succesfully before deploying packages.  Will exit(1),and exec will retry if not
   exec { "Package/Deploy OSGI Config for ${title}":
-    command => "/bin/rm -rf *.zip;/usr/bin/zip -r ${package_zip_file} *;/bin/cp ${package_zip_file} ${package_zip_install_folder}", 
+    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json ; /bin/rm -rf *.zip ; /usr/bin/zip -r ${package_zip_file} * ; /bin/cp ${package_zip_file} ${package_zip_install_folder}",
+    provider => 'shell',
     cwd     => "${tmp_osgi_dir}/${title}",
-    unless  => "/usr/bin/test ! -f ${launchpad_timestamp_file}", 
-    onlyif => "/usr/bin/test ${ensure_osgi} = present", #For some reason, this test does not work if placed within an 'unless' block, but works if in 'onlyif'?
+    onlyif => "/usr/bin/test ${ensure_osgi} = present",
     subscribe => File[ "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config/${title}.xml" ],
     require => $requiredFiles, 
-    refreshonly => true
+    refreshonly => true,
+    tries => 10,
+    try_sleep => 15
   }
 
 
