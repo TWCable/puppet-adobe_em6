@@ -36,7 +36,7 @@ define adobe_em6::instance::apply_osgi_config (
   #### Various properties we will need for configuration creation
 
   # Creates a unique identifier for a configuration.  This is useful for applying unique packages for configuration updates
-  $uuid = random(99999) 
+  $uuid = fqdn_rand(99999, "${title}${osgi_config}")
   $time = generate("/bin/date", "+%Y-%M-%d-%T")
 
   ##################################
@@ -163,7 +163,7 @@ define adobe_em6::instance::apply_osgi_config (
     cwd     => "${tmp_osgi_dir}/${title}",
     unless  => "/usr/bin/test ! -f ${launchpad_timestamp_file}", 
     onlyif => "/usr/bin/test ${ensure_osgi} = present", #For some reason, this test does not work if placed within an 'unless' block, but works if in 'onlyif'?
-    subscribe => $requiredFiles,
+    subscribe => File[ "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config/${title}.xml" ],
     require => $requiredFiles, 
     refreshonly => true
   }
