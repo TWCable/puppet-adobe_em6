@@ -1,3 +1,11 @@
+## 2015-09-15 - 1.3.2
+### Summary
+This release introduces better server start-up detection when installing OSGi configs
+
+## 2015-09-15 - 1.3.1
+### Summary
+This release fixes an issue with OSGi config package updates/installs
+
 ## 2015-09-14 - 1.3.0
 ### Summary
 This release includes a couple of new features, bug fixes and documentation updates.
