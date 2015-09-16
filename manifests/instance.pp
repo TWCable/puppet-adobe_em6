@@ -231,8 +231,8 @@ define adobe_em6::instance (
 
     $osgi_config_defaults = {
       'instance_name' => $title,
-      'before'        => Service["set up service for ${title}"],
-      'require'       => File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"],
+      'require'       => [ File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"],
+      Service["set up service for ${title}"] ]
     }
 
     create_resources('adobe_em6::instance::apply_osgi_config', $osgi_config_list, $osgi_config_defaults)
