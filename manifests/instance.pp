@@ -203,8 +203,8 @@ define adobe_em6::instance (
     validate_array($package_list)
     $aem_packages_hash = generate_resource_hash($package_list, 'filename', "${title}_package")
     $apply_packages_defaults = {
-      'before'  => Service["set up service for ${title}"],
-      'require' => File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"],
+      'instance_type' => $instance_type,
+      'require' => [ File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"], Service["set up service for ${title}"] ]
     }
 
     create_resources('adobe_em6::instance::apply_packages', $aem_packages_hash, $apply_packages_defaults)
@@ -218,8 +218,7 @@ define adobe_em6::instance (
     $replication_queues_defaults = {
       'instance_name' => $title,
       'instance_type' => $my_type,
-      'before'        => Service["set up service for ${title}"],
-      'require'       => File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"],
+      'require'       => [ File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"], Service["set up service for ${title}"] ]
     }
 
     create_resources('adobe_em6::instance::replication_queues', $replication_queues, $replication_queues_defaults)
@@ -231,8 +230,7 @@ define adobe_em6::instance (
 
     $osgi_config_defaults = {
       'instance_name' => $title,
-      'require'       => [ File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"],
-      Service["set up service for ${title}"] ]
+      'require'       => [ File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"], Service["set up service for ${title}"] ]
     }
 
     create_resources('adobe_em6::instance::apply_osgi_config', $osgi_config_list, $osgi_config_defaults)
@@ -240,8 +238,6 @@ define adobe_em6::instance (
 
   ##################################
   ### Customizing AEM files
-  ## Having scope issue with templates using instance/post_install_config.pp
-  ## and reference instance params.
   file { "${adobe_em6::params::dir_aem_install}/${title}/license.properties":
     ensure  => 'present',
     content => template('adobe_em6/license.properties.erb'),

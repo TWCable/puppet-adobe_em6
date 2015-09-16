@@ -22,7 +22,8 @@
 
 
 define adobe_em6::instance::apply_packages (
-  $filename     = UNSET,
+  $filename      = UNSET,
+  $instance_type = UNSET
 ) {
 
   if ($filename !~ /.*\.zip/  or $filename == 'UNSET') {
@@ -60,8 +61,6 @@ define adobe_em6::instance::apply_packages (
   # wget::fetch using a uless which seems to run the download every time.
   # staging::file for some reason never uses the wget cache
   $cache_hotfix_filename    = "${adobe_em6::params::dir_wget_cache}/${my_filename}"
-  $launchpad_timestamp_file = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/launchpad/conf/launchpad-timestamp.txt"
-  $install_hotfix_filename  = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${my_filename}"
 
   exec { "download_${title}_package":
     command => "wget -N -P ${adobe_em6::params::dir_wget_cache} ${my_url}",
@@ -73,17 +72,29 @@ define adobe_em6::instance::apply_packages (
     require => Package[ 'wget' ],
   }
 
-  ## In order to ensure hotfixes don't get add prior to inital start we have
+  if($instance_type == 'publish') {
+    $port = "4503"
+  }
+  else {
+    $port = "4502"
+  }
+
+  $install_hotfix_filename  = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${my_filename}"
+
+## In order to ensure hotfixes don't get add prior to inital start we have
   ## added a check on a file create after start up by AEM
   # TODO: Move to a file resource so you can add or delete base on the ensure.
   #       Will need to switch array to direct list, elimiting the need for the convert.
   exec { "copy_${filename}_hotfix_for_${instance_name}":
-    command => "cp -f ${cache_hotfix_filename} ${install_hotfix_filename}",
+    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json ; cp -f ${cache_hotfix_filename} ${install_hotfix_filename}",
+    provider => 'shell',
     cwd     => "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/",
     user    => $adobe_em6::params::aem_user,
-    unless  => [ "/usr/bin/test ! -f ${launchpad_timestamp_file}", "/usr/bin/test -f ${install_hotfix_filename}" ],
+    unless  => "/usr/bin/test -f ${install_hotfix_filename}",
     path    => [ '/bin', '/usr/bin' ],
     require => Exec [ "download_${title}_package" ],
+    tries => 40,
+    try_sleep => 15
   }
 
 }

@@ -172,7 +172,7 @@ define adobe_em6::instance::apply_osgi_config (
     subscribe => File[ "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config/${title}.xml" ],
     require => $requiredFiles, 
     refreshonly => true,
-    tries => 10,
+    tries => 40,
     try_sleep => 15
   }
 

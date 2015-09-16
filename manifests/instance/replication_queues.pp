@@ -29,6 +29,7 @@ define adobe_em6::instance::replication_queues (
   $log_level              = 'info',
   $protocol_http_expired  = 'true',
   $queue_enabled          = 'true',
+  $reverse_replication    = 'false',
   $retry_delay            = '60000',
   $transport_password     = 'admin',
   $transport_user         = 'admin',
@@ -142,17 +143,28 @@ define adobe_em6::instance::replication_queues (
     require => File[ "${tmp_queue_dir}/${title}/META-INF/vault/definition" ],
   }
 
-  ### Create package to be used to install into instance
+  if($instance_type == 'publish') {
+    $port = "4503"
+  }
+  else {
+    $port = "4502"
+  }
+
+  $uuid = fqdn_rand(99999, "${title}${jcr_description}${queue_enabled}${log_level}${protocol_http_expired}${retry_delay}${transport_password}${transport_user}${transport_uri}${reverse_replication}")
+
+### Create package to be used to install into instance
   ###
-  $output_file              = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${title}_replication.zip"
-  $launchpad_timestamp_file = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/launchpad/conf/launchpad-timestamp.txt"
+  $output_file = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${title}_${uuid}_replication.zip"
 
   exec { "create_${title}_replication_package":
-    command => "zip -rq ${output_file} *",
+    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json ; zip -rq ${output_file} *",
+    provider => "shell",
     cwd     => "${tmp_queue_dir}/${title}",
     user    => 'aem',
-    unless  => [ "/usr/bin/test ! -f ${launchpad_timestamp_file}", "/usr/bin/test -f ${output_file}" ],
+    unless  => "/usr/bin/test -f ${output_file}",
     path    => ['/bin', '/usr/bin'],
+    tries => 40,
+    try_sleep => 15,
     require => [  File[ "${tmp_queue_dir}/${title}/META-INF/vault/definition/.content.xml" ],
                   File[ "${tmp_queue_dir}/${title}/META-INF/vault/settings.xml" ],
                   File[ "${tmp_queue_dir}/${title}/META-INF/vault/properties.xml" ],
