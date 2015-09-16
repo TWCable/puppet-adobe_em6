@@ -1,3 +1,7 @@
+## 2015-09-15 - 1.3.3
+### Summary
+Change to ensure OSGi resource runs after the service starts.
+
 ## 2015-09-15 - 1.3.2
 ### Summary
 This release introduces better server start-up detection when installing OSGi configs
