@@ -5,8 +5,6 @@
 #
 # === Parameters:
 #
-# [*ensure_present*]
-#   remove or creates
 # [*instance_name*]
 #   Name of your instance.
 # [*osgi_config*]
@@ -24,7 +22,6 @@
 # === Examples:
 #
 define adobe_em6::instance::apply_osgi_config (
-  $ensure_osgi    = 'present',
   $instance_name  = 'UNSET',
   $osgi_config    = {},
 ) {
@@ -165,22 +162,14 @@ define adobe_em6::instance::apply_osgi_config (
 
   ## Use aem_bundle_status.rb to make sure AEM has started up succesfully before deploying packages.  Will exit(1),and exec will retry if not
   exec { "Package/Deploy OSGI Config for ${title}":
-    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json ; /bin/rm -rf *.zip ; /usr/bin/zip -r ${package_zip_file} * ; /bin/cp ${package_zip_file} ${package_zip_install_folder}",
+    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json ; /bin/rm -rf *.zip ; /usr/bin/zip -r ${package_zip_file} * ; /bin/mv ${package_zip_file} ${package_zip_install_folder}",
     provider => 'shell',
     cwd     => "${tmp_osgi_dir}/${title}",
-    onlyif => "/usr/bin/test ${ensure_osgi} = present",
     subscribe => File[ "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config/${title}.xml" ],
     require => $requiredFiles, 
     refreshonly => true,
     tries => 40,
     try_sleep => 15
   }
-
-
-  if ("${ensure_osgi}" == 'absent') {
-    file { "${package_zip_install_folder}${package_zip_file}":
-      ensure  => 'absent',
-    }
-  }
-
 }
+

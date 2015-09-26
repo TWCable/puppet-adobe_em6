@@ -26,8 +26,11 @@ define adobe_em6::instance::replication_queues (
   $jcr_description        = '',
   $instance_name          = 'UNSET',
   $instance_type          = 'UNSET',
+  $cq_template            = "/libs/cq/replication/templates/agent",
+  $sling_resource_type    = "cq/replication/components/agent",
   $log_level              = 'info',
   $protocol_http_expired  = 'true',
+  $protocol_http_method   = 'UNSET',
   $queue_enabled          = 'true',
   $reverse_replication    = 'false',
   $retry_delay            = '60000',
@@ -49,10 +52,11 @@ define adobe_em6::instance::replication_queues (
   }
 
   ensure_resource('file', $tmp_queue_dir, {
-    'ensure' => 'directory',
+    ensure => 'directory',
     require => File[ $adobe_em6::params::dir_aem_install ],
   })
 
+  # TLD queue staging directory used to build content packages, based on queue name
   file { "${tmp_queue_dir}/${title}":
     ensure  => 'directory',
     require => File[ $tmp_queue_dir ],
@@ -143,6 +147,14 @@ define adobe_em6::instance::replication_queues (
     require => File[ "${tmp_queue_dir}/${title}/META-INF/vault/definition" ],
   }
 
+  $requiredFiles = [ File[ "${tmp_queue_dir}/${title}/META-INF/vault/definition/.content.xml" ],
+    File[ "${tmp_queue_dir}/${title}/META-INF/vault/settings.xml" ],
+    File[ "${tmp_queue_dir}/${title}/META-INF/vault/properties.xml" ],
+    File[ "${tmp_queue_dir}/${title}/META-INF/vault/nodetypes.cnd" ],
+    File[ "${tmp_queue_dir}/${title}/META-INF/vault/filter.xml" ],
+    File[ "${tmp_queue_dir}/${title}/META-INF/vault/config.xml" ],
+    File[ "${tmp_queue_dir}/${title}/jcr_root/etc/replication/agents.${instance_type}/${title}/.content.xml" ] ]
+
   if($instance_type == 'publish') {
     $port = "4503"
   }
@@ -150,28 +162,24 @@ define adobe_em6::instance::replication_queues (
     $port = "4502"
   }
 
-  $uuid = fqdn_rand(99999, "${title}${jcr_description}${queue_enabled}${log_level}${protocol_http_expired}${retry_delay}${transport_password}${transport_user}${transport_uri}${reverse_replication}")
+  $uuid = fqdn_rand(99999, "${title}${jcr_description}${cq_template}${sling_resource_type}${queue_enabled}${log_level}${protocol_http_expired}${protocol_http_method}${retry_delay}${transport_password}${transport_user}${transport_uri}${reverse_replication}")
 
-### Create package to be used to install into instance
+  ### Create package to be used to install into instance
   ###
-  $output_file = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${title}_${uuid}_replication.zip"
+  $package_file_name = "${title}_${uuid}_replication.zip"
+  $package_file_temp = "${tmp_queue_dir}/${package_file_name}"
+  $package_install_dest = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/"
 
   exec { "create_${title}_replication_package":
-    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json ; zip -rq ${output_file} *",
+    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json ; zip -rq ${package_file_temp} * ; mv ${package_file_temp} ${package_install_dest}",
     provider => "shell",
     cwd     => "${tmp_queue_dir}/${title}",
-    user    => 'aem',
-    unless  => "/usr/bin/test -f ${output_file}",
+    user    => $adobe_em6::params::aem_user,
+    subscribe => File[ "${tmp_queue_dir}/${title}/jcr_root/etc/replication/agents.${instance_type}/${title}/.content.xml" ],
+    require => $requiredFiles,
+    refreshonly => true,
     path    => ['/bin', '/usr/bin'],
     tries => 40,
-    try_sleep => 15,
-    require => [  File[ "${tmp_queue_dir}/${title}/META-INF/vault/definition/.content.xml" ],
-                  File[ "${tmp_queue_dir}/${title}/META-INF/vault/settings.xml" ],
-                  File[ "${tmp_queue_dir}/${title}/META-INF/vault/properties.xml" ],
-                  File[ "${tmp_queue_dir}/${title}/META-INF/vault/nodetypes.cnd" ],
-                  File[ "${tmp_queue_dir}/${title}/META-INF/vault/filter.xml" ],
-                  File[ "${tmp_queue_dir}/${title}/META-INF/vault/config.xml" ],
-                  File[ "${tmp_queue_dir}/${title}/jcr_root/etc/replication/agents.${instance_type}/${title}/.content.xml" ] ]
+    try_sleep => 15
   }
-
 }

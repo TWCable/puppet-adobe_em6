@@ -26,7 +26,7 @@ define adobe_em6::instance::apply_packages (
   $instance_type = UNSET
 ) {
 
-  if ($filename !~ /.*\.zip/  or $filename == 'UNSET') {
+  if $filename !~ /\.zip$/ {
     fail("'${filename}' is not a valid package name for 'update_file'. Name needs to contain a zip extension")
   }
 
@@ -60,13 +60,15 @@ define adobe_em6::instance::apply_packages (
   # Using exec rather then wget::Fetch do to the fact that wget:fetch/staging::file checks don't really work correctly.
   # wget::fetch using a uless which seems to run the download every time.
   # staging::file for some reason never uses the wget cache
-  $cache_hotfix_filename    = "${adobe_em6::params::dir_wget_cache}/${my_filename}"
+  $hotfix_file_cache = "${adobe_em6::params::dir_wget_cache}/${my_filename}"
+  $hotfix_file_tmp = "/tmp/${my_filename}"
+  $hotfix_file_install = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${my_filename}"
 
   exec { "download_${title}_package":
     command => "wget -N -P ${adobe_em6::params::dir_wget_cache} ${my_url}",
     cwd     => '/var/cache/wget',
     user    => 'root',
-    onlyif  => "test ! -f ${$cache_hotfix_filename}",
+    onlyif  => "test ! -f ${$hotfix_file_cache}",
     path    => ['/bin', '/usr/bin'],
     timeout => $adobe_em6::params::exec_download_timeout,
     require => Package[ 'wget' ],
@@ -79,22 +81,19 @@ define adobe_em6::instance::apply_packages (
     $port = "4502"
   }
 
-  $install_hotfix_filename  = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${my_filename}"
-
-## In order to ensure hotfixes don't get add prior to inital start we have
+  ## In order to ensure hotfixes don't get added prior to inital start, we have
   ## added a check on a file create after start up by AEM
   # TODO: Move to a file resource so you can add or delete base on the ensure.
   #       Will need to switch array to direct list, elimiting the need for the convert.
   exec { "copy_${filename}_hotfix_for_${instance_name}":
-    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json ; cp -f ${cache_hotfix_filename} ${install_hotfix_filename}",
+    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json ; cp -f ${hotfix_file_cache} ${hotfix_file_tmp} ; mv -f ${hotfix_file_tmp} ${hotfix_file_install}",
     provider => 'shell',
     cwd     => "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/",
     user    => $adobe_em6::params::aem_user,
-    unless  => "/usr/bin/test -f ${install_hotfix_filename}",
+    unless  => "/usr/bin/test -f ${hotfix_file_install}",
     path    => [ '/bin', '/usr/bin' ],
     require => Exec [ "download_${title}_package" ],
     tries => 40,
     try_sleep => 15
   }
-
 }

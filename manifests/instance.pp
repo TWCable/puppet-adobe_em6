@@ -203,12 +203,11 @@ define adobe_em6::instance (
     validate_array($package_list)
     $aem_packages_hash = generate_resource_hash($package_list, 'filename', "${title}_package")
     $apply_packages_defaults = {
-      'instance_type' => $instance_type,
+      'instance_type' => $my_type,
       'require' => [ File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"], Service["set up service for ${title}"] ]
     }
 
     create_resources('adobe_em6::instance::apply_packages', $aem_packages_hash, $apply_packages_defaults)
-
   }
 
   ### Creating replications queues for instances
@@ -274,5 +273,4 @@ define adobe_em6::instance (
     service_enable  => $service_enable,
     service_ensure  => $service_ensure,
   }
-
 }

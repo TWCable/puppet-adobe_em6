@@ -3,7 +3,7 @@
     jcr:primaryType="cq:Page">
     <jcr:content
         cq:lastModifiedBy="admin"
-        cq:template="/libs/cq/replication/templates/agent"
+        cq:template="<%= @cq_template %>"
         jcr:description="Puppet created Agent. <%= @jcr_description %>"
         jcr:primaryType="nt:unstructured"
         jcr:title="<%= @title %>"
@@ -12,8 +12,11 @@
         protocolHTTPExpired="<%= @protocol_http_expired %>"
         retryDelay="<%= @retry_delay %>"
         reverseReplication="{Boolean}<%= @reverse_replication %>"
+<% if @reverse_replication == 'true' -%>
+        protocolHTTPMethod="<%= @protocol_http_method %>"
+<% end -%>
         serializationType="durbo"
-        sling:resourceType="cq/replication/components/agent"
+        sling:resourceType="<%= @sling_resource_type %>"
         transportPassword="<%= @transport_password %>"
         transportUri="<%= @transport_uri %>"
         transportUser="<%= @transport_user %>"/>
