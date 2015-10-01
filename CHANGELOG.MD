@@ -1,3 +1,13 @@
+## 2015-10-01 - 1.3.5
+### Summary
+- Fix instance_type var name in apply_packages_defaults
+- Add HTTP transport method for reverse replication polling agent
+- Package installation Exec subscribe to updated .content.xml
+- Copy packages to tmp file and mv to install dir to prevent timing issues w/ AEM picking up files before writing is complete
+- Removed ensure_osgi as not needed
+- Simplify if statement and regex on package filename check
+- Add cq:template and sling:resourceType
+
 ## 2015-09-15 - 1.3.4
 ### Summary
 - Change to ensure replication queue updates are applied successfully
