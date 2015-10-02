@@ -1,3 +1,7 @@
+## 2015-10-02 - 1.3.6
+### Summary
+- Added resources to install Required ruby and required gem
+
 ## 2015-10-01 - 1.3.5
 ### Summary
 - Fix instance_type var name in apply_packages_defaults
