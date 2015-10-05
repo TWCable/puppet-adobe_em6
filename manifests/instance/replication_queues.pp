@@ -26,21 +26,27 @@ define adobe_em6::instance::replication_queues (
   $jcr_description        = '',
   $instance_name          = 'UNSET',
   $instance_type          = 'UNSET',
-  $cq_template            = "/libs/cq/replication/templates/agent",
-  $sling_resource_type    = "cq/replication/components/agent",
+  $cq_template            = '/libs/cq/replication/templates/agent',
+  $sling_resource_type    = 'cq/replication/components/agent',
   $log_level              = 'info',
   $protocol_http_expired  = 'true',
-  $protocol_http_method   = 'UNSET',
+  $protocol_http_method   = undef,
   $queue_enabled          = 'true',
-  $reverse_replication    = 'false',
+  $reverse_replication    = undef,
   $retry_delay            = '60000',
   $transport_password     = 'admin',
   $transport_user         = 'admin',
   $transport_uri          = 'http://localhost:4503/bin/receive?sling:authRequestLogin=1',
+  $no_versioning          = undef,
+  $trigger_distribute     = undef,
+  $trigger_specific       = undef,
+  $trigger_on_off_time    = undef,
+  $serialization_type     = 'durbo'
 ) {
 
   # Using a locally scope variable to avoid longer dir names
   $tmp_queue_dir    = "${adobe_em6::params::dir_aem_install}/${instance_name}/queue_tmp"
+  $uuid = fqdn_rand(99999, "${title}${jcr_description}${cq_template}${sling_resource_type}${queue_enabled}${log_level}${protocol_http_expired}${protocol_http_method}${retry_delay}${transport_password}${transport_user}${transport_uri}${reverse_replication}${no_versioning}${trigger_distribute}${trigger_specific}${trigger_on_off_time}${serialization_type}")
 
   ##################################
   ### Instance's directory creation
@@ -161,8 +167,6 @@ define adobe_em6::instance::replication_queues (
   else {
     $port = "4502"
   }
-
-  $uuid = fqdn_rand(99999, "${title}${jcr_description}${cq_template}${sling_resource_type}${queue_enabled}${log_level}${protocol_http_expired}${protocol_http_method}${retry_delay}${transport_password}${transport_user}${transport_uri}${reverse_replication}")
 
   ### Create package to be used to install into instance
   ###

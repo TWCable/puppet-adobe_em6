@@ -2,7 +2,6 @@
 <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
     jcr:primaryType="cq:Page">
     <jcr:content
-        cq:lastModifiedBy="admin"
         cq:template="<%= @cq_template %>"
         jcr:description="Puppet created Agent. <%= @jcr_description %>"
         jcr:primaryType="nt:unstructured"
@@ -11,13 +10,28 @@
         logLevel="<%= @log_level %>"
         protocolHTTPExpired="<%= @protocol_http_expired %>"
         retryDelay="<%= @retry_delay %>"
-        reverseReplication="{Boolean}<%= @reverse_replication %>"
-<% if @reverse_replication == 'true' -%>
-        protocolHTTPMethod="<%= @protocol_http_method %>"
-<% end -%>
-        serializationType="durbo"
+        serializationType="<%= @serialization_type %>"
         sling:resourceType="<%= @sling_resource_type %>"
         transportPassword="<%= @transport_password %>"
         transportUri="<%= @transport_uri %>"
-        transportUser="<%= @transport_user %>"/>
+        transportUser="<%= @transport_user %>"
+<% unless @reverse_replication.nil? -%>
+        reverseReplication="<%= @reverse_replication %>"
+<% end -%>
+<% unless @protocol_http_method.nil? -%>
+        protocolHTTPMethod="<%= @protocol_http_method %>"
+<% end -%>
+<% unless @no_versioning.nil? -%>
+        noVersioning="<%= @no_versioning %>"
+<% end -%>
+<% unless @trigger_distribute.nil? -%>
+        triggerDistribute="<%= @trigger_distribute %>"
+<% end -%>
+<% unless @trigger_specific.nil? -%>
+        triggerSpecific="<%= @trigger_specific %>"
+<% end -%>
+<% unless @trigger_on_off_time.nil? -%>
+        triggerOnOffTime="<%= @trigger_on_off_time %>"
+<% end -%>
+        cq:lastModifiedBy="admin"/>
 </jcr:root>

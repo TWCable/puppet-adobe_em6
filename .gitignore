@@ -6,5 +6,8 @@ pkg/
 .DS_Store
 spec/fixtures
 *.idea
+*.iml
+*.ipr
+*.iws
 *.swp
 *.tmp
