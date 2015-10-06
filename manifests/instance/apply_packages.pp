@@ -5,9 +5,15 @@
 #
 # === Parameters:
 #
+# [*aem_bundle_status_passwd*]
+#   The admin password to be used for the ruby script to check bundle status.
+# [*aem_bundle_status_user*]
+#   The admin user to be used for the ruby script to check bundle status.
 # [*filename*]
 #   The package name with an .zip extension that needs to be downloaded
 #   for installed
+# [*instance_type*]
+#   Either 'author' or 'publish'
 #
 # === External Parameters
 #
@@ -22,6 +28,8 @@
 
 
 define adobe_em6::instance::apply_packages (
+  $aem_bundle_status_user     = 'admin',
+  $aem_bundle_status_passwd   = 'admin',
   $filename      = UNSET,
   $instance_type = UNSET
 ) {
@@ -86,7 +94,7 @@ define adobe_em6::instance::apply_packages (
   # TODO: Move to a file resource so you can add or delete base on the ensure.
   #       Will need to switch array to direct list, elimiting the need for the convert.
   exec { "copy_${filename}_hotfix_for_${instance_name}":
-    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json ; cp -f ${hotfix_file_cache} ${hotfix_file_tmp} ; mv -f ${hotfix_file_tmp} ${hotfix_file_install}",
+    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json  -u ${aem_bundle_status_user} -p ${aem_bundle_status_passwd}; cp -f ${hotfix_file_cache} ${hotfix_file_tmp} ; mv -f ${hotfix_file_tmp} ${hotfix_file_install}",
     provider => 'shell',
     cwd     => "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/",
     user    => $adobe_em6::params::aem_user,

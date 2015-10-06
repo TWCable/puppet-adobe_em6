@@ -85,6 +85,8 @@
 ### TODO: Need to determine if there is a better way to do global variables
 ###       then using hiera().  Need to validate after upgrade to PE 3.8
 define adobe_em6::instance (
+  $aem_bundle_status_user     = hiera('adobe_em6::instance::aem_bundle_status_user', 'admin'),
+  $aem_bundle_status_passwd   = hiera('adobe_em6::instance::aem_bundle_status_passwd', 'admin'),
   $instance_type              = hiera('adobe_em6::instance::instance_type', 'UNSET'),
   $instance_port              = hiera('adobe_em6::instance::instance_port', 'UNSET'),
   $osgi_config_list           = hiera_hash('adobe_em6::instance::osgi_config_list', {} ),
@@ -103,7 +105,7 @@ define adobe_em6::instance (
   $start_more_modes           = hiera('adobe_em6::instance::start_more_modes', 'dev'),
   $start_use_jaas             = hiera('adobe_em6::instance::start_use_jaas', ''),
   $stop_wait_for              = hiera('adobe_em6::instance::stop_wait_for', '120'),
-  $package_list                = hiera_array('adobe_em6::instance::package_list', [ 'UNSET' ] ),
+  $package_list               = hiera_array('adobe_em6::instance::package_list', [ 'UNSET' ] ),
 ) {
 
   require adobe_em6
@@ -203,6 +205,8 @@ define adobe_em6::instance (
     validate_array($package_list)
     $aem_packages_hash = generate_resource_hash($package_list, 'filename', "${title}_package")
     $apply_packages_defaults = {
+      'aem_bundle_status_user' => $aem_bundle_status_user,
+      'aem_bundle_status_passwd' => $aem_bundle_status_passwd,
       'instance_type' => $my_type,
       'require' => [ File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"], Service["set up service for ${title}"] ]
     }
@@ -217,7 +221,9 @@ define adobe_em6::instance (
     $replication_queues_defaults = {
       'instance_name' => $title,
       'instance_type' => $my_type,
-      'require'       => [ File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"], Service["set up service for ${title}"] ]
+      'aem_bundle_status_user' => $aem_bundle_status_user,
+      'aem_bundle_status_passwd' => $aem_bundle_status_passwd,
+      'require' => [ File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"], Service["set up service for ${title}"] ]
     }
 
     create_resources('adobe_em6::instance::replication_queues', $replication_queues, $replication_queues_defaults)
@@ -228,8 +234,10 @@ define adobe_em6::instance (
     validate_hash($osgi_config_list)
 
     $osgi_config_defaults = {
+      'aem_bundle_status_user' => $aem_bundle_status_user,
+      'aem_bundle_status_passwd' => $aem_bundle_status_passwd,
       'instance_name' => $title,
-      'require'       => [ File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"], Service["set up service for ${title}"] ]
+      'require' => [ File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"], Service["set up service for ${title}"] ]
     }
 
     create_resources('adobe_em6::instance::apply_osgi_config', $osgi_config_list, $osgi_config_defaults)

@@ -23,6 +23,8 @@
 #
 
 define adobe_em6::instance::replication_queues (
+  $aem_bundle_status_user     = 'admin',
+  $aem_bundle_status_passwd   = 'admin',
   $jcr_description        = '',
   $instance_name          = 'UNSET',
   $instance_type          = 'UNSET',
@@ -175,7 +177,7 @@ define adobe_em6::instance::replication_queues (
   $package_install_dest = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/"
 
   exec { "create_${title}_replication_package":
-    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json ; zip -rq ${package_file_temp} * ; mv ${package_file_temp} ${package_install_dest}",
+    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json  -u ${aem_bundle_status_user} -p ${aem_bundle_status_passwd}; zip -rq ${package_file_temp} * ; mv -f ${package_file_temp} ${package_install_dest}",
     provider => "shell",
     cwd     => "${tmp_queue_dir}/${title}",
     user    => $adobe_em6::params::aem_user,

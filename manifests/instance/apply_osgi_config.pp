@@ -9,7 +9,11 @@
 #   Name of your instance.
 # [*osgi_config*]
 #   Name of your configuration.
-#
+# [*aem_bundle_status_passwd*]
+#   The admin password to be used for the ruby script to check bundle status.
+# [*aem_bundle_status_user*]
+#   The admin user to be used for the ruby script to check bundle status.
+
 # === External Parameters
 #
 # [*adobe_em6::params::aem_user*]
@@ -22,6 +26,8 @@
 # === Examples:
 #
 define adobe_em6::instance::apply_osgi_config (
+  $aem_bundle_status_user     = 'admin',
+  $aem_bundle_status_passwd   = 'admin',
   $instance_name  = 'UNSET',
   $osgi_config    = {},
 ) {
@@ -162,14 +168,15 @@ define adobe_em6::instance::apply_osgi_config (
 
   ## Use aem_bundle_status.rb to make sure AEM has started up succesfully before deploying packages.  Will exit(1),and exec will retry if not
   exec { "Package/Deploy OSGI Config for ${title}":
-    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json ; /bin/rm -rf *.zip ; /usr/bin/zip -r ${package_zip_file} * ; /bin/mv ${package_zip_file} ${package_zip_install_folder}",
+    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json -u ${aem_bundle_status_user} -p ${aem_bundle_status_passwd}; /bin/rm -rf *.zip ; /usr/bin/zip -r ${package_zip_file} * ; /bin/mv -f ${package_zip_file} ${package_zip_install_folder}",
     provider => 'shell',
     cwd     => "${tmp_osgi_dir}/${title}",
     subscribe => File[ "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config/${title}.xml" ],
-    require => $requiredFiles, 
+    require => $requiredFiles,
     refreshonly => true,
     tries => 40,
     try_sleep => 15
   }
+
 }
 
