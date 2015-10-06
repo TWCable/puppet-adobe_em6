@@ -1,3 +1,12 @@
+## 2015-10-06 - 1.3.7
+### Summary
+Expand replication queue support
+- Add additional parameters needed for replication queues
+- Add support for flush agent type
+- Make reverseReplication param optional
+- Add uuid to package name in metadata for unique value
+- Ignore additional IntelliJ types
+
 ## 2015-10-02 - 1.3.6
 ### Summary
 - Added resources to install Required ruby and required gem
