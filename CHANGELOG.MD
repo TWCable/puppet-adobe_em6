@@ -1,3 +1,7 @@
+## 2015-10-07 - 1.3.8
+### Summary
+Added ability to use user/pass with bundle status script used by osgi, replication, and packages.
+
 ## 2015-10-06 - 1.3.7
 ### Summary
 Expand replication queue support
