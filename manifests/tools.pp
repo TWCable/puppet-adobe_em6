@@ -36,4 +36,10 @@ class adobe_em6::tools {
     require => [ File[ $adobe_em6::params::dir_tools ], Package[ 'ruby' ], Package[ 'json_pure' ] ]
   }
 
+  file { "${adobe_em6::params::dir_tools}/aem_change_passwd.rb":
+    ensure  => 'present',
+    source  => 'puppet:///modules/adobe_em6/aem_change_passwd.rb',
+    require => [ File[ $adobe_em6::params::dir_tools ], Package[ 'ruby' ], Package[ 'json_pure' ] ]
+  }
+
 }
