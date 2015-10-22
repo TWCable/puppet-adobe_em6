@@ -85,6 +85,8 @@
 ### TODO: Need to determine if there is a better way to do global variables
 ###       then using hiera().  Need to validate after upgrade to PE 3.8
 define adobe_em6::instance (
+  $aem_admin_new_passwd       = hiera('adobe_em6::instance::aem_admin_new_passwd', 'admin'),
+  $aem_admin_old_passwd       = hiera('adobe_em6::instance::aem_admin_old_passwd', 'admin'),
   $aem_bundle_status_user     = hiera('adobe_em6::instance::aem_bundle_status_user', 'admin'),
   $aem_bundle_status_passwd   = hiera('adobe_em6::instance::aem_bundle_status_passwd', 'admin'),
   $instance_type              = hiera('adobe_em6::instance::instance_type', 'UNSET'),
@@ -281,4 +283,23 @@ define adobe_em6::instance (
     service_enable  => $service_enable,
     service_ensure  => $service_ensure,
   }
+
+  ##################################
+  ### Resetting Admin password
+  # TODO: SPlit out logic out into own define type to allow managing user
+  #       This should be a resource type at that point.
+  #       Also, change the aem_bundle_Status_* to be just console user
+
+  exec { "set_admin_password_for_${title}":
+    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json -u ${aem_bundle_status_user} -p ${aem_bundle_status_passwd}; ${adobe_em6::params::dir_tools}/aem_change_passwd.rb -t ${port} -c ${aem_bundle_status_user} -p ${aem_bundle_status_passwd} -n ${aem_admin_new_passwd} -o ${aem_admin_old_passwd}",
+    provider  => 'shell',
+    cwd       => $adobe_em6::params::dir_tools,
+    user      => $adobe_em6::params::aem_user,
+    logoutput => true,
+    onlyif    => [ "test -n ${aem_admin_new_passwd}", "test ${aem_admin_new_passwd} != ${aem_admin_old_passwd}"],
+    path      => [ '/bin', '/usr/bin' ],
+    tries     => 40,
+    try_sleep => 15
+  }
+
 }
