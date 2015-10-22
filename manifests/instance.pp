@@ -291,7 +291,7 @@ define adobe_em6::instance (
   #       Also, change the aem_bundle_Status_* to be just console user
 
   exec { "set_admin_password_for_${title}":
-    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json -u ${aem_bundle_status_user} -p ${aem_bundle_status_passwd}; ${adobe_em6::params::dir_tools}/aem_change_passwd.rb -t ${port} -c ${aem_bundle_status_user} -p ${aem_bundle_status_passwd} -n ${aem_admin_new_passwd} -o ${aem_admin_old_passwd}",
+    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${my_port}/system/console/bundles.json -u ${aem_bundle_status_user} -p ${aem_bundle_status_passwd}; ${adobe_em6::params::dir_tools}/aem_change_passwd.rb -t ${my_port} -c ${aem_bundle_status_user} -p ${aem_bundle_status_passwd} -n ${aem_admin_new_passwd} -o ${aem_admin_old_passwd}",
     provider  => 'shell',
     cwd       => $adobe_em6::params::dir_tools,
     user      => $adobe_em6::params::aem_user,
