@@ -31,7 +31,7 @@ define adobe_em6::instance::replication_queues (
   $cq_template            = '/libs/cq/replication/templates/agent',
   $sling_resource_type    = 'cq/replication/components/agent',
   $log_level              = 'info',
-  $protocol_http_expired  = 'true',
+  $protocol_http_expired  = undef,
   $protocol_http_method   = undef,
   $queue_enabled          = 'true',
   $reverse_replication    = undef,
@@ -43,12 +43,14 @@ define adobe_em6::instance::replication_queues (
   $trigger_distribute     = undef,
   $trigger_specific       = undef,
   $trigger_on_off_time    = undef,
+  $trigger_receive        = undef,
+  $protocol_http_headers  = undef,
   $serialization_type     = 'durbo'
 ) {
 
   # Using a locally scope variable to avoid longer dir names
-  $tmp_queue_dir    = "${adobe_em6::params::dir_aem_install}/${instance_name}/queue_tmp"
-  $uuid = fqdn_rand(99999, "${title}${jcr_description}${cq_template}${sling_resource_type}${queue_enabled}${log_level}${protocol_http_expired}${protocol_http_method}${retry_delay}${transport_password}${transport_user}${transport_uri}${reverse_replication}${no_versioning}${trigger_distribute}${trigger_specific}${trigger_on_off_time}${serialization_type}")
+  $tmp_queue_dir = "${adobe_em6::params::dir_aem_install}/${instance_name}/queue_tmp"
+  $uuid = fqdn_rand(99999, "${title}${jcr_description}${cq_template}${sling_resource_type}${queue_enabled}${log_level}${protocol_http_expired}${protocol_http_method}${retry_delay}${transport_password}${transport_user}${transport_uri}${reverse_replication}${no_versioning}${trigger_distribute}${trigger_specific}${trigger_on_off_time}${trigger_receive}${protocol_http_headers}${serialization_type}")
 
   ##################################
   ### Instance's directory creation
@@ -177,7 +179,7 @@ define adobe_em6::instance::replication_queues (
   $package_install_dest = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/"
 
   exec { "create_${title}_replication_package":
-    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json  -u ${aem_bundle_status_user} -p ${aem_bundle_status_passwd}; zip -rq ${package_file_temp} * ; mv -f ${package_file_temp} ${package_install_dest}",
+    command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json -u ${aem_bundle_status_user} -p ${aem_bundle_status_passwd}; zip -rq ${package_file_temp} * ; mv -f ${package_file_temp} ${package_install_dest}",
     provider => "shell",
     cwd     => "${tmp_queue_dir}/${title}",
     user    => $adobe_em6::params::aem_user,

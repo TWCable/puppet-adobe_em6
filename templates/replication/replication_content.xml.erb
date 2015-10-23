@@ -8,7 +8,6 @@
         jcr:title="<%= @title %>"
         enabled="<%= @queue_enabled %>"
         logLevel="<%= @log_level %>"
-        protocolHTTPExpired="<%= @protocol_http_expired %>"
         retryDelay="<%= @retry_delay %>"
         serializationType="<%= @serialization_type %>"
         sling:resourceType="<%= @sling_resource_type %>"
@@ -18,14 +17,23 @@
 <% unless @reverse_replication.nil? -%>
         reverseReplication="<%= @reverse_replication %>"
 <% end -%>
+<% unless @protocol_http_expired.nil? -%>
+        protocolHTTPExpired="<%= @protocol_http_expired %>"
+<% end -%>
 <% unless @protocol_http_method.nil? -%>
         protocolHTTPMethod="<%= @protocol_http_method %>"
+<% end -%>
+<% unless @protocol_http_headers.nil? -%>
+        protocolHTTPHeaders="<%= @protocol_http_headers %>"
 <% end -%>
 <% unless @no_versioning.nil? -%>
         noVersioning="<%= @no_versioning %>"
 <% end -%>
 <% unless @trigger_distribute.nil? -%>
         triggerDistribute="<%= @trigger_distribute %>"
+<% end -%>
+<% unless @trigger_receive.nil? -%>
+        triggerReceive="<%= @trigger_receive %>"
 <% end -%>
 <% unless @trigger_specific.nil? -%>
         triggerSpecific="<%= @trigger_specific %>"
