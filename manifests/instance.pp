@@ -271,6 +271,12 @@ define adobe_em6::instance (
     subscribe => Exec[ "unpack_crx_jar_for_${title}" ],
   }
 
+  file { "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/conf/sling.properties":
+    ensure  => 'present',
+    content => template('adobe_em6/sling.properties.erb'),
+    subscribe => Exec[ "unpack_crx_jar_for_${title}" ],
+  }
+
   # TODO: Files to add:
   # config/* & sling.properties
   # What about custom configurations
