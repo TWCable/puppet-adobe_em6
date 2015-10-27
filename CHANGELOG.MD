@@ -1,3 +1,7 @@
+## 2015-10-27 - 1.3.9
+### Summary
+Added ability to change conf/sling.properties so that monitoring application can be used. File is currently a flat file and will need to be converted to another method.
+
 ## 2015-10-07 - 1.3.8
 ### Summary
 Added ability to use user/pass with bundle status script used by osgi, replication, and packages.
