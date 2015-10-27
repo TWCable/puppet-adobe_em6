@@ -271,6 +271,8 @@ define adobe_em6::instance (
     subscribe => Exec[ "unpack_crx_jar_for_${title}" ],
   }
 
+  # TODO:  Move this to be more dynamic  and allow user to set variables for this props files
+  #        Ideas include create a define type that uses a define type or just variablize stuff.
   file { "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/conf/sling.properties":
     ensure  => 'present',
     content => template('adobe_em6/sling.properties.erb'),
