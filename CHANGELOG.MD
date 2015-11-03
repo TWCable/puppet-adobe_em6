@@ -1,3 +1,7 @@
+# 2015-11-02 - 1.4.0
+### Summary
+Added initial support for flush agent support
+
 ## 2015-10-27 - 1.3.9
 ### Summary
 Added ability to change conf/sling.properties so that monitoring application can be used. File is currently a flat file and will need to be converted to another method.
