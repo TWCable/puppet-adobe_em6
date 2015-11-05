@@ -27,13 +27,13 @@ class adobe_em6::params (
   $aem_user                   = 'aem',
   $dir_base                   = '/data',
   $exec_download_timeout      = 1200,  # 20 minutes
-  $keystore_source_location   = 'UNSET',
+  $remote_keystore_location   = 'UNSET',
   $license_customer_name      = 'UNSET',
   $license_product_version    = 'UNSET',
   $license_downloadid         = 'UNSET',
   $remote_url_for_files       = 'UNSET',
   $pkg_aem_jar_name           = 'AEM_6.0_Quickstart.jar',
-  $truststore_source_location = 'UNSET',
+  $remote_truststore_location = 'UNSET',
 ) {
 
   # Setting Various base directories used by the installer
@@ -67,8 +67,5 @@ class adobe_em6::params (
   if ($license_customer_name == 'UNSET' or $license_product_version == 'UNSET' or $license_downloadid == 'UNSET') {
     fail('You have not set "license_customer_name", "license_product_version", or "license_downloadid"')
   }
-
-  # ## Setting up jar locations
-  # $aem_absolute_jar = "${dir_wget_cache}/${pkg_aem_jar_name}"
 
 }
