@@ -1,3 +1,7 @@
+# 2015-11-09 - 1.4.1
+### Summary
+Changed module to pull keystore/truststore from remote source
+
 # 2015-11-02 - 1.4.0
 ### Summary
 Added initial support for flush agent support
