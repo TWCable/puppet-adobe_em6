@@ -28,7 +28,7 @@ class adobe_em6 inherits adobe_em6::params {
       command => "wget -N -P ${dir_aem_certs} ${adobe_em6::params::remote_keystore_location}",
       logoutput => false,
       timeout => $adobe_em6::params::exec_download_timeout,
-      user => $adobe_em6::params::aem_user,
+      user => 'root',
       path => '/bin:/usr/bin'
     }
   }
@@ -38,7 +38,7 @@ class adobe_em6 inherits adobe_em6::params {
       command => "wget -N -P ${dir_aem_certs} ${adobe_em6::params::remote_truststore_location}",
       logoutput => false,
       timeout => $adobe_em6::params::exec_download_timeout,
-      user => $adobe_em6::params::aem_user,
+      user => 'root',
       path => '/bin:/usr/bin'
     }
   }
