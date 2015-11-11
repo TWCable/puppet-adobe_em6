@@ -33,10 +33,10 @@ define adobe_em6::instance::apply_config (
     mode    => '0755',
   }
 
-
-  file { "${adobe_em6::params::dir_aem_install}/${title}.config":
+  file { "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/${title}.config":
     ensure  => $config_ensure,
-    content => inline_template("<% @config_settings.keys.sort.each do |key| %><%= key %>=<%= @config_settings[key] %><% end %>"),
+    content => inline_template("<% @config_settings.keys.sort.each do |key| %><%= key %>=<%= @config_settings[key] %>
+      <% end %>"),
     require => File[ $adobe_em6::params::dir_aem_install ],
   }
 
