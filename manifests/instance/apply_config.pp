@@ -34,7 +34,7 @@ define adobe_em6::instance::apply_config (
   }
 
 
-  file { "adobe_em6::params::dir_aem_install/${tittle}.config":
+  file { "adobe_em6::params::dir_aem_install/${title}.config":
     ensure  => $config_ensure,
     content => inline_template("<% @config_settings.keys.sort.each do |key| %><%= key %>=<%= @config_settings[key] %><% end %>"),
     require => File[ $adobe_em6::params::dir_aem_install ],
