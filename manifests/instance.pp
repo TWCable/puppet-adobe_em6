@@ -244,6 +244,13 @@ define adobe_em6::instance (
     create_resources('adobe_em6::instance::apply_osgi_config', $osgi_config_list, $osgi_config_defaults)
   }
 
+  ### Creating configuration under install directory
+  if !empty($config_list) {
+    validate_hash($config_list)
+
+    create_resources('adobe_em6::instance::apply_config', $config_list)
+  }
+
   ##################################
   ### Customizing AEM files
   file { "${adobe_em6::params::dir_aem_install}/${title}/license.properties":
