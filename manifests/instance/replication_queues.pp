@@ -36,6 +36,8 @@ define adobe_em6::instance::replication_queues (
   $queue_enabled              = 'true',
   $reverse_replication        = undef,
   $protocol_connect_timeout   = '10000',
+  $retry_delay                = '60000',
+  $protocol_socket_timeout    = '10000',
   $transport_password         = 'admin',
   $transport_user             = 'admin',
   $transport_uri              = 'http://localhost:4503/bin/receive?sling:authRequestLogin=1',
