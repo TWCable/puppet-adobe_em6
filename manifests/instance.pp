@@ -248,7 +248,13 @@ define adobe_em6::instance (
   if !empty($config_list) {
     validate_hash($config_list)
 
-    create_resources('adobe_em6::instance::apply_config', $config_list)
+    $dir_crxquickstart_install = "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"
+    $config_defaults = {
+      'dir_install' => $dir_crxquickstart_install,
+      'require'     => File[$dir_crxquickstart_install]
+    }
+
+    create_resources('adobe_em6::instance::apply_config', $config_list, $config_defaults)
   }
 
   ##################################
