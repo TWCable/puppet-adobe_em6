@@ -25,28 +25,35 @@
 define adobe_em6::instance::replication_queues (
   $aem_bundle_status_user     = 'admin',
   $aem_bundle_status_passwd   = 'admin',
-  $jcr_description        = '',
-  $instance_name          = 'UNSET',
-  $instance_type          = 'UNSET',
-  $cq_template            = '/libs/cq/replication/templates/agent',
-  $sling_resource_type    = 'cq/replication/components/agent',
-  $log_level              = 'info',
-  $protocol_http_expired  = undef,
-  $protocol_http_method   = undef,
-  $queue_enabled          = 'true',
-  $reverse_replication    = undef,
-  $retry_delay            = '60000',
-  $transport_password     = 'admin',
-  $transport_user         = 'admin',
-  $transport_uri          = 'http://localhost:4503/bin/receive?sling:authRequestLogin=1',
-  $no_versioning          = undef,
-  $trigger_distribute     = undef,
-  $trigger_specific       = undef,
-  $trigger_on_off_time    = undef,
-  $trigger_receive        = undef,
-  $protocol_http_headers  = undef,
-  $serialization_type     = 'durbo'
+  $jcr_description            = '',
+  $instance_name              = 'UNSET',
+  $instance_type              = 'UNSET',
+  $cq_template                = '/libs/cq/replication/templates/agent',
+  $sling_resource_type        = 'cq/replication/components/agent',
+  $log_level                  = 'info',
+  $protocol_http_expired      = undef,
+  $protocol_http_method       = undef,
+  $queue_enabled              = 'true',
+  $reverse_replication        = undef,
+  $protocol_connect_timeout   = '10000',
+  $transport_password         = 'admin',
+  $transport_user             = 'admin',
+  $transport_uri              = 'http://localhost:4503/bin/receive?sling:authRequestLogin=1',
+  $no_versioning              = undef,
+  $trigger_distribute         = undef,
+  $trigger_specific           = undef,
+  $trigger_on_off_time        = undef,
+  $trigger_receive            = undef,
+  $protocol_http_headers      = undef,
+  $serialization_type         = 'durbo',
+  $ssl_strategy               = undef,
+
 ) {
+
+  # Some quick argument validation
+  if($ssl_strategy and !($ssl_strategy in ["", "default", "relaxed", "clientauth"])) {
+    fail("SSL Stategy for replication queues must be one of three values [default, relaxed, or clientauth].  A value of '${ssl_strategy}' was found")
+  }
 
   # Using a locally scope variable to avoid longer dir names
   $tmp_queue_dir = "${adobe_em6::params::dir_aem_install}/${instance_name}/queue_tmp"
