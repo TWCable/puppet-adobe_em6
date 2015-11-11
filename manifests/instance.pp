@@ -87,6 +87,7 @@
 define adobe_em6::instance (
   $aem_bundle_status_user     = hiera('adobe_em6::instance::aem_bundle_status_user', 'admin'),
   $aem_bundle_status_passwd   = hiera('adobe_em6::instance::aem_bundle_status_passwd', 'admin'),
+  $config_list                = hiera_hash('adobe_em6::instance::config_list', {} ),
   $instance_type              = hiera('adobe_em6::instance::instance_type', 'UNSET'),
   $instance_port              = hiera('adobe_em6::instance::instance_port', 'UNSET'),
   $osgi_config_list           = hiera_hash('adobe_em6::instance::osgi_config_list', {} ),
