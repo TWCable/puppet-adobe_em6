@@ -59,7 +59,7 @@ define adobe_em6::instance::replication_queues (
 
   # Using a locally scope variable to avoid longer dir names
   $tmp_queue_dir = "${adobe_em6::params::dir_aem_install}/${instance_name}/queue_tmp"
-  $uuid = fqdn_rand(99999, "${title}${jcr_description}${cq_template}${sling_resource_type}${queue_enabled}${log_level}${protocol_http_expired}${protocol_http_method}${retry_delay}${transport_password}${transport_user}${transport_uri}${reverse_replication}${no_versioning}${trigger_distribute}${trigger_specific}${trigger_on_off_time}${trigger_receive}${protocol_http_headers}${serialization_type}")
+  $uuid = fqdn_rand(99999, "${title}${jcr_description}${cq_template}${sling_resource_type}${queue_enabled}${log_level}${protocol_http_expired}${protocol_http_method}${retry_delay}${transport_password}${transport_user}${transport_uri}${reverse_replication}${no_versioning}${trigger_distribute}${trigger_specific}${trigger_on_off_time}${trigger_receive}${protocol_http_headers}${serialization_type}${ssl_strategy}${protocol_connect_timeout}${protocol_socket_timeout}")
 
   ##################################
   ### Instance's directory creation
