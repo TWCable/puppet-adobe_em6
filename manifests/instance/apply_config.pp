@@ -22,6 +22,7 @@
 define adobe_em6::instance::apply_config (
   $config_ensure   = present,
   $config_settings = {},
+  $config_file_ext = 'config',
   $dir_install     = 'UNSET',
 ) {
 
@@ -36,10 +37,9 @@ define adobe_em6::instance::apply_config (
     mode    => '0755',
   }
 
-  file { "${dir_install}/${title}.config":
+  file { "${dir_install}/${title}.${config_file_ext}":
     ensure  => $config_ensure,
-    content => inline_template("<% @config_settings.keys.sort.each do |key| %><%= key %>=<%= @config_settings[key] %>
-      <% end %>"),
+    content => template('adobe_em6/install_config.erb'),
   }
 
 }
