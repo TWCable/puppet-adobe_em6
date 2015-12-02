@@ -141,6 +141,8 @@ define adobe_em6::instance (
     $my_port  = $instance_port
   }
 
+  $dir_instance_location = "${adobe_em6::params::dir_aem_install}/${title}"
+
   ##################################
   ###  Instance's directory creation
   File {
@@ -149,7 +151,7 @@ define adobe_em6::instance (
     mode    => '0755',
   }
 
-  file { "${adobe_em6::params::dir_aem_install}/${title}":
+  file { $dir_instance_location:
     ensure  => 'directory',
     require => File[ $adobe_em6::params::dir_aem_install ],
   }
@@ -161,40 +163,96 @@ define adobe_em6::instance (
 
   ##################################
   ### Downloading and Jar Unpacking
-  # TODO: Add a log message to client to show that it downloading as long as it
-  #       doesn't cause the report to look like an resource has changed
-  $dir_instance_location = "${adobe_em6::params::dir_aem_install}/${title}"
-  $dir_instance_repo_loc = "${dir_instance_location}/crx-quickstart/repository/"
-  $aem_absolute_jar      = "${dir_instance_location}/${adobe_em6::params::pkg_aem_jar_name}"
-  $exec_path             = ['/bin', '/usr/bin', '/usr/local/bin', '/usr/java/latest/bin/' ]
 
-  exec { "download_aem_jar_${title}":
-    command   => "wget -N -P ${dir_instance_location} ${adobe_em6::params::remote_url_for_files}/${adobe_em6::params::pkg_aem_jar_name}",
+  $dir_instance_crx_quickstart = "${dir_instance_location}/crx-quickstart/"
+  $aem_absolute_jar            = "${dir_instance_location}/${adobe_em6::params::pkg_aem_jar_name}"
+  $exec_path                   = ['/bin', '/usr/bin', '/usr/local/bin', '/usr/java/latest/bin/' ]
+
+  notify { "Checking for AEM jar, and downloading if needed. This may take some time...":}
+  exec { "Download AEM jar for ${title}":
+    command   => "wget -q -N -P ${dir_instance_location} ${adobe_em6::params::remote_url_for_files}/${adobe_em6::params::pkg_aem_jar_name}",
     cwd       => $dir_instance_location,
     logoutput => false,
-    unless    => [ "test -f ${aem_absolute_jar}", "test -d ${dir_instance_repo_loc}" ],
+    unless    => [ "test -d ${dir_instance_crx_quickstart}" ],
     path      =>  $exec_path,
-    require   => Package[ 'wget' ],
+    require   => [ Package[ 'wget' ], File[ $dir_instance_location ] ],
     timeout   => $adobe_em6::params::exec_download_timeout,
     user      => $adobe_em6::params::aem_user,
   }
 
-  exec { "unpack_crx_jar_for_${title}":
+  exec { "Unpack AEM jar for ${title}":
     command   => "/usr/bin/java -jar ${aem_absolute_jar} -unpack; sleep 5",
     cwd       => $dir_instance_location,
-    creates   => $dir_instance_repo_loc,
-    logoutput => true,
+    creates   => $dir_instance_crx_quickstart,
+    logoutput => false,
     path      =>  $exec_path,
-    require   => [ Exec[ "download_aem_jar_${title}" ], Package[ 'java' ] ],
+    require   => [ Exec[ "Download AEM jar for ${title}" ], Package[ 'java' ] ],
     user      => $adobe_em6::params::aem_user,
+  }
+
+  exec { "Remove AEM jar after expansion":
+    command     => "rm -f ${adobe_em6::params::pkg_aem_jar_name}",
+    cwd         => $dir_instance_location,
+    logoutput   => false,
+    subscribe   => Exec[ "Unpack AEM jar for ${title}" ],
+    refreshonly => true,
+    path        => $exec_path
+  }
+
+  ##################################
+  ### Customizing AEM files
+
+  file { "${dir_instance_location}/license.properties":
+    ensure    => 'present',
+    content   => template('adobe_em6/license.properties.erb'),
+    require   => Exec[ "Unpack AEM jar for ${title}" ]
+  }
+
+  file { "${dir_instance_crx_quickstart}/bin/start":
+    ensure    => 'present',
+    content   => template('adobe_em6/start.erb'),
+    require   => Exec[ "Unpack AEM jar for ${title}" ]
+  }
+
+  file { "${dir_instance_crx_quickstart}/bin/stop":
+    ensure    => 'present',
+    content   => template('adobe_em6/stop.erb'),
+    require   => Exec[ "Unpack AEM jar for ${title}" ]
+  }
+
+  file { "${dir_instance_crx_quickstart}/logs":
+    ensure    => 'link',
+    target    => "${adobe_em6::params::dir_aem_log}/${title}",
+    replace   => true,
+    force     => true,
+    require   => Exec[ "Unpack AEM jar for ${title}" ]
+  }
+
+  # TODO:  Move this to be more dynamic  and allow user to set variables for this props files
+  #        Ideas include create a define type that uses a define type or just variablize stuff.
+  file { "${dir_instance_crx_quickstart}/conf/sling.properties":
+    ensure  => 'present',
+    content => template('adobe_em6/sling.properties.erb'),
+    subscribe => Exec[ "Unpack AEM jar for ${title}" ],
+  }
+
+  # TODO: Files to add:
+  # config/* & sling.properties
+  # What about custom configurations
+
+  ##################################
+  ### Creating AEM service
+  adobe_em6::instance::service { "${title}_service_creation":
+    service_enable  => $service_enable,
+    service_ensure  => $service_ensure,
   }
 
   ##################################
   ### Applying Packages
   ## Creating install directory and downloading packages.
-  file { "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install":
+  file { "${dir_instance_crx_quickstart}/install":
     ensure  => 'directory',
-    require => Exec[ "unpack_crx_jar_for_${title}" ]
+    require => Exec[ "Unpack AEM jar for ${title}" ]
   }
 
   ## TODO: This can be converted to an iteration feature starting in Puppet 3.2
@@ -208,7 +266,7 @@ define adobe_em6::instance (
       'aem_bundle_status_user' => $aem_bundle_status_user,
       'aem_bundle_status_passwd' => $aem_bundle_status_passwd,
       'instance_type' => $my_type,
-      'require' => [ File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"], Service["set up service for ${title}"] ]
+      'require' => [ File["${dir_instance_crx_quickstart}/install"], Service["set up service for ${title}"] ]
     }
 
     create_resources('adobe_em6::instance::apply_packages', $aem_packages_hash, $apply_packages_defaults)
@@ -223,7 +281,7 @@ define adobe_em6::instance (
       'instance_type' => $my_type,
       'aem_bundle_status_user' => $aem_bundle_status_user,
       'aem_bundle_status_passwd' => $aem_bundle_status_passwd,
-      'require' => [ File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"], Service["set up service for ${title}"] ]
+      'require' => [ File["${dir_instance_crx_quickstart}/install"], Service["set up service for ${title}"] ]
     }
 
     create_resources('adobe_em6::instance::replication_queues', $replication_queues, $replication_queues_defaults)
@@ -237,56 +295,10 @@ define adobe_em6::instance (
       'aem_bundle_status_user' => $aem_bundle_status_user,
       'aem_bundle_status_passwd' => $aem_bundle_status_passwd,
       'instance_name' => $title,
-      'require' => [ File["${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/install"], Service["set up service for ${title}"] ]
+      'require' => [ File["${dir_instance_crx_quickstart}/install"], Service["set up service for ${title}"] ]
     }
 
     create_resources('adobe_em6::instance::apply_osgi_config', $osgi_config_list, $osgi_config_defaults)
   }
 
-  ##################################
-  ### Customizing AEM files
-  file { "${adobe_em6::params::dir_aem_install}/${title}/license.properties":
-    ensure  => 'present',
-    content => template('adobe_em6/license.properties.erb'),
-    subscribe => Exec[ "unpack_crx_jar_for_${title}" ],
-  }
-
-  file { "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/bin/start":
-    ensure  => 'present',
-    content => template('adobe_em6/start.erb'),
-    subscribe => Exec[ "unpack_crx_jar_for_${title}" ],
-  }
-
-  file { "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/bin/stop":
-    ensure  => 'present',
-    content => template('adobe_em6/stop.erb'),
-    subscribe => Exec[ "unpack_crx_jar_for_${title}" ],
-  }
-
-  file { "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/logs":
-    ensure    => 'link',
-    target    => "${adobe_em6::params::dir_aem_log}/${title}",
-    replace   => true,
-    force     => true,
-    subscribe => Exec[ "unpack_crx_jar_for_${title}" ],
-  }
-
-  # TODO:  Move this to be more dynamic  and allow user to set variables for this props files
-  #        Ideas include create a define type that uses a define type or just variablize stuff.
-  file { "${adobe_em6::params::dir_aem_install}/${title}/crx-quickstart/conf/sling.properties":
-    ensure  => 'present',
-    content => template('adobe_em6/sling.properties.erb'),
-    subscribe => Exec[ "unpack_crx_jar_for_${title}" ],
-  }
-
-  # TODO: Files to add:
-  # config/* & sling.properties
-  # What about custom configurations
-
-  ##################################
-  ### Creating AEM service
-  adobe_em6::instance::service { "${title}_service_creation":
-    service_enable  => $service_enable,
-    service_ensure  => $service_ensure,
-  }
 }
