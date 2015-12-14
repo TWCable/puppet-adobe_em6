@@ -164,7 +164,7 @@ define adobe_em6::instance (
   ##################################
   ### Downloading and Jar Unpacking
 
-  $dir_instance_crx_quickstart = "${dir_instance_location}/crx-quickstart/"
+  $dir_instance_crx_quickstart = "${dir_instance_location}/crx-quickstart"
   $aem_absolute_jar            = "${dir_instance_location}/${adobe_em6::params::pkg_aem_jar_name}"
   $exec_path                   = ['/bin', '/usr/bin', '/usr/local/bin', '/usr/java/latest/bin/' ]
 
@@ -205,19 +205,19 @@ define adobe_em6::instance (
   file { "${dir_instance_location}/license.properties":
     ensure    => 'present',
     content   => template('adobe_em6/license.properties.erb'),
-    require   => Exec[ "Unpack AEM jar for ${title}" ]
+    subscribe  => Exec[ "Unpack AEM jar for ${title}" ]
   }
 
   file { "${dir_instance_crx_quickstart}/bin/start":
     ensure    => 'present',
     content   => template('adobe_em6/start.erb'),
-    require   => Exec[ "Unpack AEM jar for ${title}" ]
+    subscribe => Exec[ "Unpack AEM jar for ${title}" ]
   }
 
   file { "${dir_instance_crx_quickstart}/bin/stop":
     ensure    => 'present',
     content   => template('adobe_em6/stop.erb'),
-    require   => Exec[ "Unpack AEM jar for ${title}" ]
+    subscribe => Exec[ "Unpack AEM jar for ${title}" ]
   }
 
   file { "${dir_instance_crx_quickstart}/logs":
@@ -225,7 +225,7 @@ define adobe_em6::instance (
     target    => "${adobe_em6::params::dir_aem_log}/${title}",
     replace   => true,
     force     => true,
-    require   => Exec[ "Unpack AEM jar for ${title}" ]
+    subscribe => Exec[ "Unpack AEM jar for ${title}" ]
   }
 
   # TODO:  Move this to be more dynamic  and allow user to set variables for this props files
