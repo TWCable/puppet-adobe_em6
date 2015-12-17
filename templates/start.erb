@@ -67,16 +67,16 @@ if [ $CQ_USE_JAAS ]; then
 fi
 START_OPTS="${START_OPTS} -Dsling.properties=conf/sling.properties"
 
-STDOUTLOG="${CURR_DIR}/logs/stdout.log"
-if [ -e ${STDOUTLOG} ]
+STARTUPLOG="${CURR_DIR}/logs/startup.log"
+if [ -e ${STARTUPLOG} ]
 then
-        TIMESTAMP=`date +"%Y-%m-%d_%H-%M-%S"`
-        mv ${STDOUTLOG} ${STDOUTLOG}.${TIMESTAMP}
+		rm -f ${STARTUPLOG}
 fi
 
 (
   (
     java $CQ_JVM_OPTS -jar $CURR_DIR/$CQ_JARFILE $START_OPTS &
     echo $! > $CURR_DIR/conf/cq.pid
-  ) >> ${STDOUTLOG} 2>&1
+  ) >> ${STARTUPLOG} 2>&1
 ) &
+
