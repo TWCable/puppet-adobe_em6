@@ -72,101 +72,101 @@ define adobe_em6::instance::replication_queues (
 
   ensure_resource('file', $tmp_queue_dir, {
     ensure => 'directory',
-    require => File[ $adobe_em6::params::dir_aem_install ],
+    require => File[$adobe_em6::params::dir_aem_install],
   })
 
   # TLD queue staging directory used to build content packages, based on queue name
   file { "${tmp_queue_dir}/${title}":
     ensure  => 'directory',
-    require => File[ $tmp_queue_dir ],
+    require => File[$tmp_queue_dir],
   }
 
   ###  Creating package Metadata directory
   file { "${tmp_queue_dir}/${title}/META-INF":
     ensure  => 'directory',
-    require => File[ "$tmp_queue_dir/${title}" ],
+    require => File["$tmp_queue_dir/${title}"],
   }
 
   file { "${tmp_queue_dir}/${title}/META-INF/vault":
     ensure  => 'directory',
-    require => File[ "$tmp_queue_dir/${title}/META-INF" ],
+    require => File["$tmp_queue_dir/${title}/META-INF"],
   }
 
   file { "${tmp_queue_dir}/${title}/META-INF/vault/definition":
     ensure  => 'directory',
-    require => File[ "$tmp_queue_dir/${title}/META-INF" ],
+    require => File["$tmp_queue_dir/${title}/META-INF"],
   }
 
   ###  Creating content directories
   file { "${tmp_queue_dir}/${title}/jcr_root":
     ensure  => 'directory',
-    require => File[ "$tmp_queue_dir/${title}" ],
+    require => File["$tmp_queue_dir/${title}"],
   }
 
   file { "${tmp_queue_dir}/${title}/jcr_root/etc":
     ensure  => 'directory',
-    require => File[ "${tmp_queue_dir}/${title}/jcr_root" ],
+    require => File["${tmp_queue_dir}/${title}/jcr_root"],
   }
 
   file { "${tmp_queue_dir}/${title}/jcr_root/etc/replication":
     ensure  => 'directory',
-    require => File[ "${tmp_queue_dir}/${title}/jcr_root/etc" ],
+    require => File["${tmp_queue_dir}/${title}/jcr_root/etc"],
   }
 
   file { "${tmp_queue_dir}/${title}/jcr_root/etc/replication/agents.${instance_type}":
     ensure  => 'directory',
-    require => File[ "${tmp_queue_dir}/${title}/jcr_root/etc/replication" ],
+    require => File["${tmp_queue_dir}/${title}/jcr_root/etc/replication"],
   }
 
   file { "${tmp_queue_dir}/${title}/jcr_root/etc/replication/agents.${instance_type}/${title}":
     ensure  => 'directory',
-    require => File[ "${tmp_queue_dir}/${title}/jcr_root/etc/replication/agents.${instance_type}" ],
+    require => File["${tmp_queue_dir}/${title}/jcr_root/etc/replication/agents.${instance_type}"],
   }
 
   ### Creating the files for package
   file { "${tmp_queue_dir}/${title}/jcr_root/etc/replication/agents.${instance_type}/${title}/.content.xml":
     ensure  => 'present',
     content => template('adobe_em6/replication/replication_content.xml.erb'),
-    require => File[ "${tmp_queue_dir}/${title}/jcr_root/etc/replication/agents.${instance_type}/${title}" ],
+    require => File["${tmp_queue_dir}/${title}/jcr_root/etc/replication/agents.${instance_type}/${title}"],
   }
 
   file { "${tmp_queue_dir}/${title}/META-INF/vault/config.xml":
     ensure  => 'present',
     content => template('adobe_em6/replication/config.xml.erb'),
-    require => File[ "${tmp_queue_dir}/${title}/META-INF/vault" ],
+    require => File["${tmp_queue_dir}/${title}/META-INF/vault"],
   }
 
   file { "${tmp_queue_dir}/${title}/META-INF/vault/filter.xml":
     ensure  => 'present',
     content => template('adobe_em6/replication/filter.xml.erb'),
-    require => File[ "${tmp_queue_dir}/${title}/META-INF/vault" ],
+    require => File["${tmp_queue_dir}/${title}/META-INF/vault"],
   }
 
   file { "${tmp_queue_dir}/${title}/META-INF/vault/nodetypes.cnd":
     ensure  => 'present',
     content => template('adobe_em6/replication/nodetypes.cnd.erb'),
-    require => File[ "${tmp_queue_dir}/${title}/META-INF/vault" ],
+    require => File["${tmp_queue_dir}/${title}/META-INF/vault"],
   }
 
   file { "${tmp_queue_dir}/${title}/META-INF/vault/properties.xml":
     ensure  => 'present',
     content => template('adobe_em6/replication/properties.xml.erb'),
-    require => File[ "${tmp_queue_dir}/${title}/META-INF/vault" ],
+    require => File["${tmp_queue_dir}/${title}/META-INF/vault"],
   }
 
   file { "${tmp_queue_dir}/${title}/META-INF/vault/settings.xml":
     ensure  => 'present',
     content => template('adobe_em6/replication/settings.xml.erb'),
-    require => File[ "${tmp_queue_dir}/${title}/META-INF/vault" ],
+    require => File["${tmp_queue_dir}/${title}/META-INF/vault"],
   }
 
   file { "${tmp_queue_dir}/${title}/META-INF/vault/definition/.content.xml":
     ensure  => 'present',
     content => template('adobe_em6/replication/definition_content.xml.erb'),
-    require => File[ "${tmp_queue_dir}/${title}/META-INF/vault/definition" ],
+    require => File["${tmp_queue_dir}/${title}/META-INF/vault/definition"],
   }
 
-  $requiredFiles = [ File[ "${tmp_queue_dir}/${title}/META-INF/vault/definition/.content.xml" ],
+  $requiredFiles = [File["${tmp_queue_dir}/${title}/META-INF/vault/definition/.content.xml"],
     File[ "${tmp_queue_dir}/${title}/META-INF/vault/settings.xml" ],
     File[ "${tmp_queue_dir}/${title}/META-INF/vault/properties.xml" ],
     File[ "${tmp_queue_dir}/${title}/META-INF/vault/nodetypes.cnd" ],
@@ -192,7 +192,7 @@ define adobe_em6::instance::replication_queues (
     provider => "shell",
     cwd     => "${tmp_queue_dir}/${title}",
     user    => $adobe_em6::params::aem_user,
-    subscribe => File[ "${tmp_queue_dir}/${title}/jcr_root/etc/replication/agents.${instance_type}/${title}/.content.xml" ],
+    subscribe => File["${tmp_queue_dir}/${title}/jcr_root/etc/replication/agents.${instance_type}/${title}/.content.xml"],
     require => $requiredFiles,
     refreshonly => true,
     path    => ['/bin', '/usr/bin'],

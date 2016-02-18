@@ -23,7 +23,7 @@ class adobe_em6::tools_setup {
     path    => "${adobe_em::dir_tools}/consistencyCheck.sh",
     content => template('adobe_em/consistencyCheck.sh.erb'),
     mode    => '0744',
-    require => [ File[ 'create aem tools log directory' ], File[ 'create aem tools directory' ] ],
+    require =>[File['create aem tools log directory'], File['create aem tools directory']],
   }
 
   file { 'create aemGarbageCollection.sh' :
@@ -31,7 +31,7 @@ class adobe_em6::tools_setup {
     path    => "${adobe_em::dir_tools}/aemGarbageCollection.sh",
     content => template('adobe_em/aemGarbageCollection.sh.erb'),
     mode    => '0744',
-    require => [ File[ 'create aem tools log directory' ], File[ 'create aem tools directory' ] ],
+    require =>[File['create aem tools log directory'], File['create aem tools directory']],
   }
 
   cron { "cron for ${cms_type} consistencyCheck.sh" :

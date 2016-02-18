@@ -79,7 +79,7 @@ define adobe_em6::instance::apply_packages (
     onlyif  => "test ! -f ${$hotfix_file_cache}",
     path    => ['/bin', '/usr/bin'],
     timeout => $adobe_em6::params::exec_download_timeout,
-    require => Package[ 'wget' ],
+    require => Package['wget'],
   }
 
   if($instance_type == 'publish') {
@@ -100,7 +100,7 @@ define adobe_em6::instance::apply_packages (
     user    => $adobe_em6::params::aem_user,
     unless  => "/usr/bin/test -f ${hotfix_file_install}",
     path    => [ '/bin', '/usr/bin' ],
-    require => Exec [ "download_${title}_package" ],
+    require => Exec["download_${title}_package"],
     tries => 40,
     try_sleep => 15
   }

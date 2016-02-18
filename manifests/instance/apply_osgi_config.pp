@@ -58,92 +58,92 @@ define adobe_em6::instance::apply_osgi_config (
 
   ensure_resource('file', $tmp_osgi_dir, {
     'ensure' => 'directory',
-    require => File[ $adobe_em6::params::dir_aem_install ],
+    require => File[$adobe_em6::params::dir_aem_install],
   })
 
   file { "${tmp_osgi_dir}/${title}":
     ensure  => 'directory',
-    require => File[ $tmp_osgi_dir ],
+    require => File[$tmp_osgi_dir],
   }
 
   ###  Creating package Metadata directory
   file { "${tmp_osgi_dir}/${title}/META-INF":
     ensure  => 'directory',
-    require => File[ "${tmp_osgi_dir}/${title}" ],
+    require => File["${tmp_osgi_dir}/${title}"],
   }
 
   file { "${tmp_osgi_dir}/${title}/META-INF/vault":
     ensure  => 'directory',
-    require => File[ "${tmp_osgi_dir}/${title}/META-INF" ],
+    require => File["${tmp_osgi_dir}/${title}/META-INF"],
   }
 
   file { "${tmp_osgi_dir}/${title}/META-INF/vault/definition":
     ensure  => 'directory',
-    require => File[ "${tmp_osgi_dir}/${title}/META-INF" ],
+    require => File["${tmp_osgi_dir}/${title}/META-INF"],
   }
 
   ### Creating content directories
   file { "${tmp_osgi_dir}/${title}/jcr_root":
     ensure  => 'directory',
-    require => File[ "${tmp_osgi_dir}/${title}" ],
+    require => File["${tmp_osgi_dir}/${title}"],
   }
 
   file { "${tmp_osgi_dir}/${title}/jcr_root/apps":
     ensure  => 'directory',
-    require => File[ "${tmp_osgi_dir}/${title}/jcr_root" ],
+    require => File["${tmp_osgi_dir}/${title}/jcr_root"],
   }
 
   file { "${tmp_osgi_dir}/${title}/jcr_root/apps/system":
     ensure  => 'directory',
-    require => File[ "${tmp_osgi_dir}/${title}/jcr_root/apps" ],
+    require => File["${tmp_osgi_dir}/${title}/jcr_root/apps"],
   }
 
   file { "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config":
     ensure  => 'directory',
-    require => File[ "${tmp_osgi_dir}/${title}/jcr_root/apps/system" ],
+    require => File["${tmp_osgi_dir}/${title}/jcr_root/apps/system"],
   }
 
   ### Creating the files for package
   file { "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config/${title}.xml":
     ensure  => 'present',
     content => template('adobe_em6/osgi_config/osgi.xml.erb'),
-    require => File[ "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config" ]
+    require => File["${tmp_osgi_dir}/${title}/jcr_root/apps/system/config"]
   }
 
   file { "${tmp_osgi_dir}/${title}/META-INF/vault/config.xml":
     ensure  => 'present',
     content => template('adobe_em6/osgi_config/config.xml.erb'),
-    require => File[ "${tmp_osgi_dir}/${title}/META-INF/vault" ],
+    require => File["${tmp_osgi_dir}/${title}/META-INF/vault"],
   }
 
   file { "${tmp_osgi_dir}/${title}/META-INF/vault/filter.xml":
     ensure  => 'present',
     content => template('adobe_em6/osgi_config/filter.xml.erb'),
-    require => File[ "${tmp_osgi_dir}/${title}/META-INF/vault" ],
+    require => File["${tmp_osgi_dir}/${title}/META-INF/vault"],
   }
 
   file { "${tmp_osgi_dir}/${title}/META-INF/vault/nodetypes.cnd":
     ensure  => 'present',
     content => template('adobe_em6/osgi_config/nodetypes.cnd.erb'),
-    require => File[ "${tmp_osgi_dir}/${title}/META-INF/vault" ],
+    require => File["${tmp_osgi_dir}/${title}/META-INF/vault"],
   }
 
   file { "${tmp_osgi_dir}/${title}/META-INF/vault/properties.xml":
     ensure  => 'present',
     content => template('adobe_em6/osgi_config/properties.xml.erb'),
-    require => File[ "${tmp_osgi_dir}/${title}/META-INF/vault" ],
+    require => File["${tmp_osgi_dir}/${title}/META-INF/vault"],
   }
 
   file { "${tmp_osgi_dir}/${title}/META-INF/vault/settings.xml":
     ensure  => 'present',
     content => template('adobe_em6/replication/settings.xml.erb'),
-    require => File[ "${tmp_osgi_dir}/${title}/META-INF/vault" ],
+    require => File["${tmp_osgi_dir}/${title}/META-INF/vault"],
   }
 
   file { "${tmp_osgi_dir}/${title}/META-INF/vault/definition/.content.xml":
     ensure  => 'present',
     content => template('adobe_em6/osgi_config/definition_content.xml.erb'),
-    require => File[ "${tmp_osgi_dir}/${title}/META-INF/vault/definition" ],
+    require => File["${tmp_osgi_dir}/${title}/META-INF/vault/definition"],
   }
 
   $package_zip_install_folder = "${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/install/"
@@ -151,13 +151,13 @@ define adobe_em6::instance::apply_osgi_config (
 
   ### Create package to be used to install into instance
   ###
-  $requiredFiles = [  File[ "${tmp_osgi_dir}/${title}/META-INF/vault/definition/.content.xml" ],
-                      File[ "${tmp_osgi_dir}/${title}/META-INF/vault/settings.xml" ],
-                      File[ "${tmp_osgi_dir}/${title}/META-INF/vault/properties.xml" ],
-                      File[ "${tmp_osgi_dir}/${title}/META-INF/vault/nodetypes.cnd" ],
-                      File[ "${tmp_osgi_dir}/${title}/META-INF/vault/filter.xml" ],
-                      File[ "${tmp_osgi_dir}/${title}/META-INF/vault/config.xml" ],
-                      File[ "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config/${title}.xml" ] ]
+  $requiredFiles =[ File["${tmp_osgi_dir}/${title}/META-INF/vault/definition/.content.xml"],
+                      File["${tmp_osgi_dir}/${title}/META-INF/vault/settings.xml"],
+                      File["${tmp_osgi_dir}/${title}/META-INF/vault/properties.xml"],
+                      File["${tmp_osgi_dir}/${title}/META-INF/vault/nodetypes.cnd"],
+                      File["${tmp_osgi_dir}/${title}/META-INF/vault/filter.xml"],
+                      File["${tmp_osgi_dir}/${title}/META-INF/vault/config.xml"],
+                      File["${tmp_osgi_dir}/${title}/jcr_root/apps/system/config/${title}.xml"]]
 
   if($instance_name == 'publish') {
     $port = "4503"
@@ -171,7 +171,7 @@ define adobe_em6::instance::apply_osgi_config (
     command => "set -e ; ${adobe_em6::params::dir_tools}/aem_bundle_status.rb -a http://localhost:${port}/system/console/bundles.json -u ${aem_bundle_status_user} -p ${aem_bundle_status_passwd}; /bin/rm -rf *.zip ; /usr/bin/zip -r ${package_zip_file} * ; /bin/mv -f ${package_zip_file} ${package_zip_install_folder}",
     provider => 'shell',
     cwd     => "${tmp_osgi_dir}/${title}",
-    subscribe => File[ "${tmp_osgi_dir}/${title}/jcr_root/apps/system/config/${title}.xml" ],
+    subscribe => File["${tmp_osgi_dir}/${title}/jcr_root/apps/system/config/${title}.xml"],
     require => $requiredFiles,
     refreshonly => true,
     tries => 40,

@@ -64,7 +64,7 @@ define adobe_em6::instance::service (
       hasrestart  => true,
       hasstatus   => true,
       name        => "aem_${instance_name}",
-      require     => [ File["/etc/init.d/aem_${instance_name}"],
+      require     => [File["/etc/init.d/aem_${instance_name}"],
         File["${adobe_em6::params::dir_aem_install}/${instance_name}/crx-quickstart/bin/start"],
         File["${adobe_em6::params::dir_aem_install}/${instance_name}/license.properties"]
       ]

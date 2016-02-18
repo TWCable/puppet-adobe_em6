@@ -37,7 +37,7 @@ class adobe_em6::pre_install_directory {
       ensure  => directory,
       owner   => 'root',
       group   => 'root',
-      require => File[ $adobe_em6::params::dir_base ]
+      require => File[$adobe_em6::params::dir_base]
     }
   }
 
@@ -46,7 +46,7 @@ class adobe_em6::pre_install_directory {
       ensure  => directory,
       owner   => 'root',
       group   => 'root',
-      require => File[ $adobe_em6::params::dir_base ]
+      require => File[$adobe_em6::params::dir_base]
     }
   }
 
@@ -55,36 +55,36 @@ class adobe_em6::pre_install_directory {
       ensure  => directory,
       owner   => 'root',
       group   => 'root',
-      require => File[ $adobe_em6::params::dir_base ]
+      require => File[$adobe_em6::params::dir_base]
     }
   }
 
   if ! defined(File[$adobe_em6::params::dir_aem_certs]) {
     file { $adobe_em6::params::dir_aem_certs:
       ensure  => 'directory',
-      require => File[ $adobe_em6::params::dir_base ],
+      require => File[$adobe_em6::params::dir_base],
     }
   }
   ######  AEM specific base directories
 
   file { $adobe_em6::params::dir_aem_install:
     ensure  => 'directory',
-    require => File[ $adobe_em6::params::dir_base_apps ],
+    require => File[$adobe_em6::params::dir_base_apps],
   }
 
   file { $adobe_em6::params::dir_aem_log:
     ensure  => 'directory',
-    require => File[ $adobe_em6::params::dir_base_logs ],
+    require => File[$adobe_em6::params::dir_base_logs],
   }
 
   file { $adobe_em6::params::dir_tools:
     ensure  => 'directory',
-    require => File[ $adobe_em6::params::dir_base_tools ],
+    require => File[$adobe_em6::params::dir_base_tools],
   }
 
   file { $adobe_em6::params::dir_tools_log:
     ensure  => 'directory',
-    require => File[ $adobe_em6::params::dir_base_logs ],
+    require => File[$adobe_em6::params::dir_base_logs],
   }
 
 }
