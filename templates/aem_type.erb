@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# chkconfig: 345 95 20
+# chkconfig: 35 99 01
 # description: Starts and stops aem  services.
 #
 #  This file is managed by Puppet.  DON"T EDIT FILE
@@ -13,23 +13,34 @@
 . /etc/sysconfig/network
 
 # Check that networking is up.
-[ ${NETWORKING} = "no" ] && exit 0
+[ ${NETWORKING} = "no" ] && exit 1
 
 SCRIPTNAME=$0
 INSTANCENAME="<%= @instance_name %>"
-PROG=$"CQ5 ${INSTANCENAME} instance."
+PROG="AEM ${INSTANCENAME} instance."
 STARTUPDIR="<%= scope['::adobe_em6::params::dir_aem_install'] %>/${INSTANCENAME}/crx-quickstart"
-
-[ -f /etc/sysconfig/${INSTANCENAME} ] && . /etc/sysconfig/${INSTANCENAME}
+AEMUSER="<%= scope['::adobe_em6::params::aem_user'] %>"
+LOCK="/var/lock/subsys/${SCRIPTNAME}"
 
 start() {
-        echo -e $"Starting:\n ${PROG} "
-        su - <%= scope['::adobe_em6::params::aem_user'] %> -c "${STARTUPDIR}/bin/start"
+  [ -f "${LOCK}" ] && exit 0
+  touch "${LOCK}"
+  log "$(date) - Starting: ${PROG}"
+  su - ${AEMUSER} -c "${STARTUPDIR}/bin/start"
 }
 
 stop() {
-        echo -e $"Shutting down:\n ${PROG} "
-        su - <%= scope['::adobe_em6::params::aem_user'] %> -c "${STARTUPDIR}/bin/stop"
+  log "$(date) - Shutting down: ${PROG}"
+  su - ${AEMUSER} -c "${STARTUPDIR}/bin/stop"
+  wait
+  #Let things settle a bit
+  sleep 5
+  rm -rf "${LOCK}"
+}
+
+log() {
+  echo $1
+  logger $1
 }
 
 # See how we were called.
@@ -46,7 +57,7 @@ case "$1" in
         start
         ;;
   status)
-        su - <%= scope['::adobe_em6::params::aem_user'] %> -c "${STARTUPDIR}/bin/status"
+        su - ${AEMUSER} -c "${STARTUPDIR}/bin/status"
         ;;
   *)
         echo $"Usage: ${SCRIPTNAME} {start|stop|restart|status}"
