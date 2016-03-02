@@ -89,6 +89,9 @@ define adobe_em6::instance (
   $aem_bundle_status_passwd   = hiera('adobe_em6::instance::aem_bundle_status_passwd', 'admin'),
   $instance_type              = hiera('adobe_em6::instance::instance_type', 'UNSET'),
   $instance_port              = hiera('adobe_em6::instance::instance_port', 'UNSET'),
+  $should_manage_compaction   = hiera('adobe_em6::instance::should_manage_compaction', 'false'),
+  $provision_compact_tool     = hiera('adobe_em6::instance::provision_compact_tool', 'false'),
+  $compact_disk_percent       = hiera('adobe_em6::instance::compact_disk_percent', '80'),
   $osgi_config_list           = hiera_hash('adobe_em6::instance::osgi_config_list', {} ),
   $replication_queues         = hiera_hash('adobe_em6::instance::replication_queues', {} ),
   $service_enable             = hiera('adobe_em6::instance::service_enable', 'true'),
@@ -168,14 +171,13 @@ define adobe_em6::instance (
   $aem_absolute_jar            = "${dir_instance_location}/${adobe_em6::params::pkg_aem_jar_name}"
   $exec_path                   = ['/bin', '/usr/bin', '/usr/local/bin', '/usr/java/latest/bin/' ]
 
-  notify { "Checking for AEM jar, and downloading if needed. This may take some time...":}
   exec { "Download AEM jar for ${title}":
     command   => "wget -q -N -P ${dir_instance_location} ${adobe_em6::params::remote_url_for_files}/${adobe_em6::params::pkg_aem_jar_name}",
     cwd       => $dir_instance_location,
-    logoutput => false,
-    unless    => [ "test -d ${dir_instance_crx_quickstart}" ],
+    logoutput => true,
+    unless    => ["test -d ${dir_instance_crx_quickstart}"],
     path      =>  $exec_path,
-    require   =>[Package['wget'], File[$dir_instance_location]],
+    require   => [Package['wget'], File[$dir_instance_location]],
     timeout   => $adobe_em6::params::exec_download_timeout,
     user      => $adobe_em6::params::aem_user,
   }
@@ -253,6 +255,37 @@ define adobe_em6::instance (
   file { "${dir_instance_crx_quickstart}/install":
     ensure  => 'directory',
     require => Exec["Unpack AEM jar for ${title}"]
+  }
+
+  $compact_jar = "${adobe_em6::params::dir_tools}/offlineCompact.jar"
+
+  if ($should_manage_compaction == "true" or $provision_compact_tool == "true") {
+    $compact_tool_present = 'present'
+  }
+  else {
+    $compact_tool_present = 'absent'
+  }
+
+  file { $compact_jar:
+    ensure => $compact_tool_present,
+    require => Exec["Download compaction tool"]
+  }
+
+  exec { "Download compaction tool":
+    command     => "wget -O offlineCompact.jar ${adobe_em6::params::remote_url_for_files}/${adobe_em6::params::compact_jar_name}",
+    cwd         => "${adobe_em6::params::dir_tools}",
+    creates     => $compact_jar,
+    onlyif      => "test ${compact_tool_present} == 'present'",
+    logoutput   => false,
+    path        =>  $exec_path,
+    require     => [ Package[ 'wget' ] ],
+    timeout     => $adobe_em6::params::exec_download_timeout,
+    user        => $adobe_em6::params::aem_user
+  }
+  
+  file { "${adobe_em6::params::dir_tools}/aemUtils.sh":
+    ensure => present,
+    content => template('adobe_em6/aemUtils.erb')
   }
 
   ## TODO: This can be converted to an iteration feature starting in Puppet 3.2
