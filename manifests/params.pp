@@ -33,6 +33,7 @@ class adobe_em6::params (
   $license_downloadid         = 'UNSET',
   $remote_url_for_files       = 'UNSET',
   $pkg_aem_jar_name           = 'AEM_6.0_Quickstart.jar',
+  $compact_jar_name           = "oak-jcr-1.2.2.jar",
   $remote_truststore_location = 'UNSET',
 ) {
 
