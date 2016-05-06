@@ -12,6 +12,9 @@
 # Source networking configuration.
 . /etc/sysconfig/network
 
+# Source AEM utilities
+. <%= scope['::adobe_em6::params::dir_tools'] %>/aemUtils.sh
+
 # Check that networking is up.
 [ ${NETWORKING} = "no" ] && exit 1
 
@@ -20,10 +23,21 @@ INSTANCENAME="<%= @instance_name %>"
 PROG="AEM ${INSTANCENAME} instance."
 STARTUPDIR="<%= scope['::adobe_em6::params::dir_aem_install'] %>/${INSTANCENAME}/crx-quickstart"
 AEMUSER="<%= scope['::adobe_em6::params::aem_user'] %>"
+MANAGE_COMPACTION="<%= @should_manage_compaction %>"
 LOCK="/var/lock/subsys/aem_${INSTANCENAME}"
 
 start() {
+  #Make sure more than one AEM process isn't started
   [ -f "${LOCK}" ] && exit 0
+  if [ ${MANAGE_COMPACTION} == "true" ]; then
+    #See aemUtils for these function definitions
+    if [ $(aboveDiskUsageThreshold) == "true" ]; then
+      log "Your machine has managed compaction set, and has crossed the set disk threshold"
+      log "JCR compaction will be run now to ensure system stability. AEM will start after this process is complete."
+      runOfflineCompaction
+    fi
+  fi
+  #Create a lock, so that when the OS changes run levels, the AEM process is killed correctly (and stop called below)
   touch "${LOCK}"
   log "$(date) - Starting: ${PROG}"
   su - ${AEMUSER} -c "${STARTUPDIR}/bin/start"
@@ -33,8 +47,7 @@ stop() {
   log "$(date) - Shutting down: ${PROG}"
   su - ${AEMUSER} -c "${STARTUPDIR}/bin/stop"
   wait
-  #Let things settle a bit
-  sleep 5
+  #When AEM is finished shutting down, only then do we let OS shutdown continue
   rm -rf "${LOCK}"
 }
 
