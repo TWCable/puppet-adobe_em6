@@ -23,13 +23,13 @@ INSTANCENAME="<%= @instance_name %>"
 PROG="AEM ${INSTANCENAME} instance."
 STARTUPDIR="<%= scope['::adobe_em6::params::dir_aem_install'] %>/${INSTANCENAME}/crx-quickstart"
 AEMUSER="<%= scope['::adobe_em6::params::aem_user'] %>"
-MANAGE_COMPACTION="<%= @should_manage_compaction %>"
+MANAGE_COMPACTION="<%= scope['::adobe_em6::instance::should_manage_compaction'] %>"
 LOCK="/var/lock/subsys/aem_${INSTANCENAME}"
 
 start() {
   #Make sure more than one AEM process isn't started
   [ -f "${LOCK}" ] && exit 0
-  if [ ${MANAGE_COMPACTION} == "true" ]; then
+  if [ "${MANAGE_COMPACTION}" == "true" ]; then
     #See aemUtils for these function definitions
     if [ $(aboveDiskUsageThreshold) == "true" ]; then
       log "Your machine has managed compaction set, and has crossed the set disk threshold"
