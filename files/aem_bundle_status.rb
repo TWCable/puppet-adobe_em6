@@ -60,6 +60,8 @@ end
 
 opt_parser.parse!(ARGV)
 
+p "requesting #{options.console_uri} -- #{options.console_user}:xxxxxx" if options.verbose
+
 bundles = AemBundleStatus.get_bundles_status(options.console_uri, options.console_user, options.console_pass)
 p "Bundles status: #{bundles['status']}"
 pp bundles if options.verbose
