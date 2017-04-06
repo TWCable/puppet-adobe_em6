@@ -15,18 +15,18 @@
 #
 class adobe_em6::tools {
 
-  package { 'ruby' :
-    ensure => '1.8.7.374-4.el6_6'
+  package { 'ruby':
+    ensure => 'installed'
   }
 
-  package { 'rubygems' :
-    ensure => '1.3.7-5.el6',
+  package { 'rubygems':
+    ensure => 'installed',
     require => Package['ruby']
   }
 
-  package { 'json_pure' :
+  package { 'json_pure':
     provider => 'gem',
-    ensure => "1.8.2",
+    ensure => 'installed',
     require => Package['ruby']
   }
 
